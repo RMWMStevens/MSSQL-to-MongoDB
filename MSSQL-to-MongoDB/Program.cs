@@ -47,7 +47,7 @@ namespace MSSQL_to_MongoDB
                     }
 
                     Console.WriteLine("Importing from MSSQL...");
-                    var importResult = sqlService.Import();
+                    var importResult = sqlService.ImportDatabase();
 
                     if (!importResult.IsSuccess)
                     {

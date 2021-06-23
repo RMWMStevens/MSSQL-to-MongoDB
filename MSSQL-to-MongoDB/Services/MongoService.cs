@@ -12,7 +12,6 @@ namespace MSSQL_to_MongoDB.Services
     public class MongoService : DatabaseService
     {
         private const string databaseName = "What2Watch";
-        public string DatabaseName { get { return databaseName; } }
 
         public MongoService()
         {

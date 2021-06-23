@@ -1,13 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using MSSQL_to_MongoDB.Services;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 
 namespace MSSQL_to_MongoDB.Helpers
 {
     public static class SqlHelper
     {
-        public static List<string> RunQuery(string connectionString, string sqlQuery)
+        public static List<string> RunQuery(string sqlQuery)
         {
-            var sqlConnection = new SqlConnection(connectionString);
+            var sqlConnection = new SqlConnection(SqlService.ConnectionString);
             sqlConnection.Open();
 
             var command = new SqlCommand(sqlQuery, sqlConnection);

@@ -21,21 +21,21 @@ namespace MSSQL_to_MongoDB.Services
             return $"For SQL Authentication: \n{sqlAuth}\nFor Windows Authentication (leave 'SSPI' as is): \n{winAuth}";
         }
 
-        public ActionResult<MSSQL> Import()
+        public ActionResult<MSSQL> ImportDatabase()
         {
             try
             {
                 var database = new MSSQL()
                 {
-                    Countries = SqlHelper.RunQuery(connectionString, "SELECT * FROM COUNTRIES ORDER BY 1").ToCountries(),
-                    FavoriteMoviesPerUser = SqlHelper.RunQuery(connectionString, "SELECT * FROM FAVORITE_MOVIES_PER_USER ORDER BY 1").ToFavoriteMoviesPerUser(),
-                    MovieInCountries = SqlHelper.RunQuery(connectionString, "SELECT * FROM MOVIE_IN_COUNTRIES ORDER BY 1").ToMovieInCountries(),
-                    MovieOnPlatforms = SqlHelper.RunQuery(connectionString, "SELECT * FROM MOVIE_ON_PLATFORMS ORDER BY 1").ToMovieOnPlatforms(),
-                    MovieRatings = SqlHelper.RunQuery(connectionString, "SELECT * FROM MOVIE_RATINGS ORDER BY 1").ToMovieRatings(),
-                    Movies = SqlHelper.RunQuery(connectionString, "SELECT * FROM MOVIES ORDER BY 1").ToMovies(),
-                    PlatformUsers = SqlHelper.RunQuery(connectionString, "SELECT * FROM PLATFORM_USERS ORDER BY 1").ToPlatformUsers(),
-                    UserMediaTypes = SqlHelper.RunQuery(connectionString, "SELECT * FROM USER_MEDIA_TYPES ORDER BY 1").ToUserMediaTypes(),
-                    Users = SqlHelper.RunQuery(connectionString, "SELECT * FROM USERS").ToUsers(),
+                    Countries = SqlHelper.RunQuery("SELECT * FROM COUNTRIES ORDER BY 1").ToCountries(),
+                    FavoriteMoviesPerUser = SqlHelper.RunQuery("SELECT * FROM FAVORITE_MOVIES_PER_USER ORDER BY 1").ToFavoriteMoviesPerUser(),
+                    MovieInCountries = SqlHelper.RunQuery("SELECT * FROM MOVIE_IN_COUNTRIES ORDER BY 1").ToMovieInCountries(),
+                    MovieOnPlatforms = SqlHelper.RunQuery("SELECT * FROM MOVIE_ON_PLATFORMS ORDER BY 1").ToMovieOnPlatforms(),
+                    MovieRatings = SqlHelper.RunQuery("SELECT * FROM MOVIE_RATINGS ORDER BY 1").ToMovieRatings(),
+                    Movies = SqlHelper.RunQuery("SELECT * FROM MOVIES ORDER BY 1").ToMovies(),
+                    PlatformUsers = SqlHelper.RunQuery("SELECT * FROM PLATFORM_USERS ORDER BY 1").ToPlatformUsers(),
+                    UserMediaTypes = SqlHelper.RunQuery("SELECT * FROM USER_MEDIA_TYPES ORDER BY 1").ToUserMediaTypes(),
+                    Users = SqlHelper.RunQuery("SELECT * FROM USERS").ToUsers(),
                 };
 
                 return ActionResultHelper.CreateSuccessResult(database);
