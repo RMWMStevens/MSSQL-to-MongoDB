@@ -26,7 +26,7 @@ namespace MSSQL_to_MongoDB.Services
         {
             try
             {
-                Console.WriteLine($"Setting connection string for database system \n{system}\n");
+                Console.WriteLine($"Setting connection string for database system: {system}\n");
                 Console.WriteLine($"The connection string should be of the following format: \n{connectionInfo.GetExampleFormat(system)}\n");
 
                 switch (system)
