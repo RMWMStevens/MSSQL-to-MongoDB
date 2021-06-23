@@ -5,6 +5,15 @@ namespace MSSQL_to_MongoDB.Helpers
 {
     public static class ActionResultHelper
     {
+        public static ActionResult<T> CreateFailureResult<T>(string message = default)
+        {
+            return new ActionResult<T>
+            {
+                IsSuccess = false,
+                Message = message
+            };
+        }
+
         public static ActionResult<T> CreateSuccessResult<T>(T data, string message = default)
         {
             return new ActionResult<T>()

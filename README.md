@@ -1,2 +1,2 @@
 # MSSQL-to-MongoDB
- A C# script to convert a relational MSSQL database to MongoDB
+A C# console app to convert a relational MS SQL database to MongoDB

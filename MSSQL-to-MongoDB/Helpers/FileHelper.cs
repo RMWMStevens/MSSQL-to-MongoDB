@@ -24,13 +24,13 @@ namespace MSSQL_to_MongoDB.Helpers
             }
         }
 
-        public static ActionResult SaveFile<T>(string filePath, T connInfo)
+        public static ActionResult SaveFile<T>(string filePath, T connectionInfo)
         {
             try
             {
                 using Stream stream = File.Open(filePath, FileMode.Create);
                 var binaryFormatter = new BinaryFormatter();
-                binaryFormatter.Serialize(stream, connInfo);
+                binaryFormatter.Serialize(stream, connectionInfo);
                 return new ActionResult { IsSuccess = true };
             }
             catch (System.Exception ex)
@@ -43,23 +43,8 @@ namespace MSSQL_to_MongoDB.Helpers
         {
             try
             {
-                if (FileExists(filePath))
-                {
-                    return new ActionResult<T>
-                    {
-                        IsSuccess = false,
-                        Message = "File does not exist!"
-                    };
-                }
-
-                if (FileEmpty(filePath))
-                {
-                    return new ActionResult<T>
-                    {
-                        IsSuccess = false,
-                        Message = "File is empty!"
-                    };
-                }
+                if (!FileExists(filePath)) { return ActionResultHelper.CreateFailureResult<T>("File does not exist!"); }
+                if (FileEmpty(filePath)) { return ActionResultHelper.CreateFailureResult<T>("File is empty!"); }
 
                 using Stream stream = File.Open(filePath, FileMode.OpenOrCreate);
                 var binaryFormatter = new BinaryFormatter();
