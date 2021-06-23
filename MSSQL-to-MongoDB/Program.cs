@@ -5,15 +5,15 @@ namespace MSSQL_to_MongoDB
 {
     class Program
     {
-        private static readonly MsSqlService msSqlService = new MsSqlService();
-        private static readonly MongoDbService mongoDbService = new MongoDbService();
+        private static readonly SqlService sqlService = new SqlService();
+        private static readonly MongoService mongoService = new MongoService();
 
         private static bool completed = false;
 
         static void Main(string[] args)
         {
-            msSqlService.LoadOnStartup();
-            mongoDbService.LoadOnStartup();
+            sqlService.LoadOnStartup();
+            mongoService.LoadOnStartup();
             PressToContinue();
 
             bool showMenu = true;
@@ -47,7 +47,7 @@ namespace MSSQL_to_MongoDB
                     }
 
                     Console.WriteLine("Importing from MSSQL...");
-                    var importResult = msSqlService.Import();
+                    var importResult = sqlService.Import();
 
                     if (!importResult.IsSuccess)
                     {
@@ -58,11 +58,11 @@ namespace MSSQL_to_MongoDB
 
                     Console.WriteLine("Import succesful");
                     Console.WriteLine("Exporting to MongoDB...");
-                    var exportResult = mongoDbService.Export(importResult.Data);
+                    var exportResult = mongoService.Export(importResult.Data);
 
                     if (!exportResult.IsSuccess)
                     {
-                        Console.WriteLine($"Import failed: {exportResult.Message}");
+                        Console.WriteLine($"Export failed: {exportResult.Message}");
                         PressToContinue();
                         return false;
                     }
@@ -72,10 +72,10 @@ namespace MSSQL_to_MongoDB
                     PressToContinue();
                     return true;
                 case ConsoleKey.D2:
-                    msSqlService.SetConnectionString();
+                    sqlService.SetConnectionString();
                     return true;
                 case ConsoleKey.D3:
-                    mongoDbService.SetConnectionString();
+                    mongoService.SetConnectionString();
                     return true;
                 case ConsoleKey.D4:
                     ShowConnectionInfo();
@@ -90,9 +90,9 @@ namespace MSSQL_to_MongoDB
 
         static void ShowConnectionInfo()
         {
-            msSqlService.ShowConnectionInfo();
+            sqlService.ShowConnectionInfo();
             Console.WriteLine();
-            mongoDbService.ShowConnectionInfo();
+            mongoService.ShowConnectionInfo();
         }
 
         static void PressToContinue()

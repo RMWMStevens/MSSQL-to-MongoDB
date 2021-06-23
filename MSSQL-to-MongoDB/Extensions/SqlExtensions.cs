@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace MSSQL_to_MongoDB.Extensions
 {
-    public static class MsSqlExtensions
+    public static class SqlExtensions
     {
         public static List<Country> ToCountries(this List<string> rowStrings)
         {
