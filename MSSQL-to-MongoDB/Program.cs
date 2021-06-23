@@ -8,6 +8,8 @@ namespace MSSQL_to_MongoDB
         private static readonly MsSqlService msSqlService = new MsSqlService();
         private static readonly MongoDbService mongoDbService = new MongoDbService();
 
+        private static bool completed = false;
+
         static void Main(string[] args)
         {
             msSqlService.LoadOnStartup();
@@ -37,8 +39,36 @@ namespace MSSQL_to_MongoDB
             switch (key)
             {
                 case ConsoleKey.D1:
-                    var database = msSqlService.Import();
-                    Console.WriteLine("Import from MSSQL to C# succesful");
+                    if (completed) 
+                    {
+                        Console.WriteLine("Import already complete, it is not advisable to run it again");
+                        PressToContinue();
+                        return false;
+                    }
+
+                    Console.WriteLine("Importing from MSSQL...");
+                    var importResult = msSqlService.Import();
+
+                    if (!importResult.IsSuccess)
+                    {
+                        Console.WriteLine($"Import failed: {importResult.Message}");
+                        PressToContinue();
+                        return false;
+                    }
+
+                    Console.WriteLine("Import succesful");
+                    Console.WriteLine("Exporting to MongoDB...");
+                    var exportResult = mongoDbService.Export(importResult.Data);
+
+                    if (!exportResult.IsSuccess)
+                    {
+                        Console.WriteLine($"Import failed: {exportResult.Message}");
+                        PressToContinue();
+                        return false;
+                    }
+
+                    Console.WriteLine("Export succesful");
+                    completed = true;
                     PressToContinue();
                     return true;
                 case ConsoleKey.D2:
