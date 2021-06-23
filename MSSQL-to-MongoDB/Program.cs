@@ -1,22 +1,17 @@
-﻿using MSSQL_to_MongoDB.Models;
-using MSSQL_to_MongoDB.Models.Enums;
-using MSSQL_to_MongoDB.Services;
+﻿using MSSQL_to_MongoDB.Services;
 using System;
-//using SqlModels = MSSQL_to_MongoDB.Models.MSSQL;
-//using MongoModels = MSSQL_to_MongoDB.Models.MongoDB;
 
 namespace MSSQL_to_MongoDB
 {
     class Program
     {
-        private static readonly string filePath = "./mssql-to-mongodb-conn.bin";
-        private static ConnectionInfo connectionInfo;
-
-        private static FileService fileService = new FileService();
+        private static readonly MsSqlService msSqlService = new MsSqlService();
+        private static readonly MongoDbService mongoDbService = new MongoDbService();
 
         static void Main(string[] args)
         {
-            connectionInfo = fileService.LoadOnStartup(filePath);
+            msSqlService.LoadOnStartup();
+            mongoDbService.LoadOnStartup();
             PressToContinue();
 
             bool showMenu = true;
@@ -44,16 +39,13 @@ namespace MSSQL_to_MongoDB
                 case ConsoleKey.D1:
                     return true;
                 case ConsoleKey.D2:
-                    var sqlResult = fileService.SetConnectionString(connectionInfo, filePath, DatabaseSystem.MSSQL);
-                    if (!sqlResult.IsSuccess) { Console.WriteLine($"Something went wrong: {sqlResult.Message}"); }
+                    msSqlService.SetConnectionString();
                     return true;
                 case ConsoleKey.D3:
-                    var mongoResult = fileService.SetConnectionString(connectionInfo, filePath, DatabaseSystem.MongoDB);
-                    if (!mongoResult.IsSuccess) { Console.WriteLine($"Something went wrong: {mongoResult.Message}"); }
+                    mongoDbService.SetConnectionString();
                     return true;
                 case ConsoleKey.D4:
                     ShowConnectionInfo();
-                    PressToContinue();
                     return true;
                 case ConsoleKey.Escape:
                     return false;
@@ -64,9 +56,10 @@ namespace MSSQL_to_MongoDB
 
         static void ShowConnectionInfo()
         {
-            Console.WriteLine($"Current MS SQL connection string: \n{connectionInfo.MSSQL}");
+            msSqlService.ShowConnectionInfo();
             Console.WriteLine();
-            Console.WriteLine($"Current MongoDB connection string: \n{connectionInfo.MongoDB}");
+            mongoDbService.ShowConnectionInfo();
+            PressToContinue();
         }
 
         static void PressToContinue()
