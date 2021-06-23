@@ -6,4 +6,8 @@
     <RootNamespace>MSSQL_to_MongoDB</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
+  </ItemGroup>
+
 </Project>

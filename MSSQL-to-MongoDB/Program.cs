@@ -37,6 +37,8 @@ namespace MSSQL_to_MongoDB
             switch (key)
             {
                 case ConsoleKey.D1:
+                    msSqlService.RunQuery();
+                    PressToContinue();
                     return true;
                 case ConsoleKey.D2:
                     msSqlService.SetConnectionString();
@@ -46,6 +48,7 @@ namespace MSSQL_to_MongoDB
                     return true;
                 case ConsoleKey.D4:
                     ShowConnectionInfo();
+                    PressToContinue();
                     return true;
                 case ConsoleKey.Escape:
                     return false;
@@ -59,7 +62,6 @@ namespace MSSQL_to_MongoDB
             msSqlService.ShowConnectionInfo();
             Console.WriteLine();
             mongoDbService.ShowConnectionInfo();
-            PressToContinue();
         }
 
         static void PressToContinue()

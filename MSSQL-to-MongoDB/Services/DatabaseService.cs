@@ -14,15 +14,13 @@ namespace MSSQL_to_MongoDB.Services
 
         public string GetFilePath(DatabaseSystem system)
         {
-            return $"./mssql-to-mongodb_{system}.bin";
+            return $"./MSSQL-to-MongoDB - Settings/mssql-to-mongodb_{system}.bin";
         }
 
         public void ShowConnectionInfo()
         {
             Console.WriteLine($"Current MS SQL connection string: \n{connectionString}");
         }
-
-        public abstract string GetExampleFormat();
 
         public void LoadOnStartup()
         {
@@ -43,10 +41,15 @@ namespace MSSQL_to_MongoDB.Services
         {
             try
             {
-                Console.WriteLine($"Setting connection string for database system: {system}\n");
+                Console.WriteLine($"Setting connection string for database system: {system}");
+                Console.WriteLine($"Leave empty and press Enter to skip setting a new string\n");
                 Console.WriteLine($"The connection string should be of the following format: \n{GetExampleFormat()}\n");
 
-                connectionString = Console.ReadLine();
+                var input = Console.ReadLine();
+
+                if (string.IsNullOrEmpty(input)) { return; }
+
+                connectionString = input;
                 FileHelper.SaveFile(GetFilePath(System), connectionString);
             }
             catch (Exception ex)
@@ -54,5 +57,7 @@ namespace MSSQL_to_MongoDB.Services
                 Console.WriteLine($"Setting new connection string went wrong: {ex.Message}");
             }
         }
+
+        public abstract string GetExampleFormat();
     }
 }
