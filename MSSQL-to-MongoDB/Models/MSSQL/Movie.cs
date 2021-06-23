@@ -5,6 +5,7 @@
         public int MovieID { get; set; }
         public string Title { get; set; }
         public string Age { get; set; }
+        public string MediaType { get; set; }
         public int Runtime { get; set; }
     }
 }

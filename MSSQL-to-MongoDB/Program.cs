@@ -37,7 +37,7 @@ namespace MSSQL_to_MongoDB
             switch (key)
             {
                 case ConsoleKey.D1:
-                    msSqlService.RunQuery();
+                    msSqlService.Import();
                     PressToContinue();
                     return true;
                 case ConsoleKey.D2:

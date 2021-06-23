@@ -1,4 +1,7 @@
-﻿using System;
+﻿using MSSQL_to_MongoDB.Extensions;
+using MSSQL_to_MongoDB.Models.MSSQL;
+using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 
 namespace MSSQL_to_MongoDB.Services
@@ -18,28 +21,55 @@ namespace MSSQL_to_MongoDB.Services
             return $"For SQL Authentication: \n{sqlAuth}\nFor Windows Authentication: \n{winAuth}";
         }
 
-        public void RunQuery()
+        public MSSQL Import()
         {
-            var sqlConnection = new SqlConnection(connectionString);
-            sqlConnection.Open();
-
-            var query = "SELECT TOP 10 * FROM MOVIES";
-            var command = new SqlCommand(query, sqlConnection);
-            var dataReader = command.ExecuteReader();
-
-            while (dataReader.Read())
+            var database = new MSSQL()
             {
-                var row = string.Empty;
+                Countries = RunQuery("SELECT * FROM COUNTRIES").ToCountries(),
+                FavoriteMoviesPerUser = RunQuery("SELECT * FROM FAVORITE_MOVIES_PER_USER").ToFavoriteMoviesPerUser(),
+                MovieInCountries = RunQuery("SELECT * FROM MOVIE_IN_COUNTRIES").ToMovieInCountries(),
+                MovieOnPlatforms = RunQuery("SELECT * FROM MOVIE_ON_PLATFORMS").ToMovieOnPlatforms(),
+                MovieRatings = RunQuery("SELECT * FROM MOVIE_RATINGS").ToMovieRatings(),
+                Movies = RunQuery("SELECT * FROM MOVIES").ToMovies(),
+                PlatformUsers = RunQuery("SELECT * FROM PLATFORM_USERS").ToPlatformUsers(),
+                UserMediaTypes = RunQuery("SELECT * FROM USER_MEDIA_TYPES").ToUserMediaTypes(),
+                Users = RunQuery("SELECT * FROM USERS").ToUsers(),
+            };
 
-                for (var i = 0; i < dataReader.FieldCount; i++)
+            return database;
+        }
+
+        public List<string> RunQuery(string sqlQuery)
+        {
+            try
+            {
+                var sqlConnection = new SqlConnection(connectionString);
+                sqlConnection.Open();
+
+                var command = new SqlCommand(sqlQuery, sqlConnection);
+                var dataReader = command.ExecuteReader();
+
+                var rows = new List<string>();
+
+                while (dataReader.Read())
                 {
-                    if (i != 0) { row += " - "; }
-                    row += dataReader.GetValue(i);
-                }
-                Console.WriteLine(row);
-            }
+                    var row = string.Empty;
 
-            sqlConnection.Close();
+                    for (var i = 0; i < dataReader.FieldCount; i++)
+                    {
+                        if (i != 0) { row += "|"; }
+                        row += dataReader.GetValue(i);
+                    }
+                    rows.Add(row);
+                }
+
+                sqlConnection.Close();
+                return rows;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }
