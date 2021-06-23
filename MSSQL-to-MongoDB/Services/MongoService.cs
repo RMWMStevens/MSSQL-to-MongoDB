@@ -1,10 +1,10 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using MSSQL_to_MongoDB.Extensions;
 using MSSQL_to_MongoDB.Helpers;
 using MSSQL_to_MongoDB.Models;
 using MSSQL_to_MongoDB.Models.MongoDB.Enums;
 using MSSQL_to_MongoDB.Models.MSSQL;
-using MSSQL_to_MongoDB.Extensions;
 using System;
 
 namespace MSSQL_to_MongoDB.Services
@@ -12,6 +12,7 @@ namespace MSSQL_to_MongoDB.Services
     public class MongoService : DatabaseService
     {
         private const string databaseName = "What2Watch";
+        public string DatabaseName { get { return databaseName; } }
 
         public MongoService()
         {
@@ -29,7 +30,7 @@ namespace MSSQL_to_MongoDB.Services
             {
                 var movies = sqlDatabase.ToMovies();
                 //Insert(Collections.USERS, sqlDatabase.ToUsers().ToBsonDocument());
-                MongoHelper.Insert(connectionString, databaseName, Collections.MOVIES, movies.ToBsonDocument());
+                Insert(Collections.MOVIES, movies.ToBsonDocument());
                 //Insert(Collections.PLATFORMS, sqlDatabase.ToPlatforms().ToBsonDocument());
 
                 return new ActionResult { IsSuccess = true };
@@ -40,6 +41,12 @@ namespace MSSQL_to_MongoDB.Services
             }
         }
 
-        
+        private void Insert(Collections collectionName, BsonDocument bsonDocument)
+        {
+            var mongoClient = new MongoClient(connectionString);
+            var database = mongoClient.GetDatabase(databaseName);
+            var collection = database.GetCollection<BsonDocument>(collectionName.ToString());
+            collection.InsertOne(bsonDocument);
+        }
     }
 }

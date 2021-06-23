@@ -31,14 +31,14 @@ namespace MSSQL_to_MongoDB.Extensions
 
             var sqlMovieRatings = sqlDatabase.MovieRatings.FindAll(m => m.MovieID == sqlMovie.MovieID);
 
-            foreach(var sqlMovieRating in sqlMovieRatings)
+            foreach (var sqlMovieRating in sqlMovieRatings)
             {
                 movie.Ratings.Add(sqlMovieRating.ToMovieRating());
             }
 
             var sqlMovieInCountries = sqlDatabase.MovieInCountries.FindAll(m => m.MovieID == sqlMovie.MovieID);
 
-            foreach(var sqlMovieInCountry in sqlMovieInCountries)
+            foreach (var sqlMovieInCountry in sqlMovieInCountries)
             {
                 movie.ReleasedInCountries.Add(sqlMovieInCountry.ToCountry(sqlDatabase.Countries));
             }

@@ -3,8 +3,6 @@ using MSSQL_to_MongoDB.Helpers;
 using MSSQL_to_MongoDB.Models;
 using MSSQL_to_MongoDB.Models.MSSQL;
 using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
 
 namespace MSSQL_to_MongoDB.Services
 {

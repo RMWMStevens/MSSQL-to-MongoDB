@@ -39,7 +39,7 @@ namespace MSSQL_to_MongoDB
             switch (key)
             {
                 case ConsoleKey.D1:
-                    if (completed) 
+                    if (completed)
                     {
                         Console.WriteLine("Import already complete, it is not advisable to run it again");
                         PressToContinue();
