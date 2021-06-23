@@ -25,8 +25,8 @@ namespace MSSQL_to_MongoDB
         {
             Console.Clear();
             Console.WriteLine("Select an option:");
-            Console.WriteLine("1) Start conversion from MS SQL to MongoDB");
-            Console.WriteLine("2) Change MS SQL connection string");
+            Console.WriteLine("1) Start conversion from MSSQL to MongoDB");
+            Console.WriteLine("2) Change MSSQL connection string");
             Console.WriteLine("3) Change MongoDB connection string");
             Console.WriteLine("4) Show current connection info");
             Console.WriteLine("ESC) Exit");
@@ -37,7 +37,8 @@ namespace MSSQL_to_MongoDB
             switch (key)
             {
                 case ConsoleKey.D1:
-                    msSqlService.Import();
+                    var database = msSqlService.Import();
+                    Console.WriteLine("Import from MSSQL to C# succesful");
                     PressToContinue();
                     return true;
                 case ConsoleKey.D2:

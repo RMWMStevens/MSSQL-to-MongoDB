@@ -19,7 +19,7 @@ namespace MSSQL_to_MongoDB.Services
 
         public void ShowConnectionInfo()
         {
-            Console.WriteLine($"Current MS SQL connection string: \n{connectionString}");
+            Console.WriteLine($"Current MSSQL connection string: \n{connectionString}");
         }
 
         public void LoadOnStartup()
