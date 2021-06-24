@@ -24,7 +24,7 @@ namespace MSSQL_to_MongoDB.Services
 
         public void LoadOnStartup()
         {
-            Console.WriteLine($"Reading {system} configuration file...");
+            LogHelper.Log($"Reading {system} configuration file...");
 
             var loadResult = FileHelper.LoadFile<string>(GetFilePath(system));
             if (!loadResult.IsSuccess)
@@ -33,7 +33,7 @@ namespace MSSQL_to_MongoDB.Services
                 return;
             }
 
-            Console.WriteLine($"Loaded {system} connection strings succesfully from local filesystem");
+            LogHelper.Log($"Loaded {system} connection strings succesfully from local filesystem");
             connectionString = loadResult.Data;
         }
 
@@ -54,7 +54,7 @@ namespace MSSQL_to_MongoDB.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Setting new connection string went wrong: {ex.Message}");
+                LogHelper.Log($"Setting new connection string went wrong: {ex.Message}");
             }
         }
 

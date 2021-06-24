@@ -54,7 +54,7 @@ namespace MSSQL_to_MongoDB.Services
         {
             var movieRefs = new List<Movie_REF>();
 
-            Console.WriteLine($"MongoService - Getting MOVIE references");
+            LogHelper.Log("Getting MOVIE references", nameof(MongoService));
 
             foreach (var movie in movies)
             {
@@ -90,7 +90,7 @@ namespace MSSQL_to_MongoDB.Services
         {
             var userRefs = new List<User_REF>();
 
-            Console.WriteLine($"MongoService - Getting USER references");
+            LogHelper.Log("Getting USER references", nameof(MongoService));
 
             foreach (var user in users)
             {
@@ -128,7 +128,7 @@ namespace MSSQL_to_MongoDB.Services
 
         private void Insert<T>(Collections collectionName, List<T> list)
         {
-            Console.WriteLine($"MongoService - Exporting {collectionName}");
+            LogHelper.Log($"Exporting {collectionName}", nameof(MongoService));
             var database = GetDatabase();
             var collection = database.GetCollection<T>(collectionName.ToString());
             collection.InsertMany(list);
@@ -136,7 +136,7 @@ namespace MSSQL_to_MongoDB.Services
 
         private void DropCollections()
         {
-            Console.WriteLine("MongoService - Dropping collections");
+            LogHelper.Log("Dropping collections", nameof(MongoService));
             var collections = (Collections[])Enum.GetValues(typeof(Collections));
             foreach (var collection in collections)
             {

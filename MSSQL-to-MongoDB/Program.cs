@@ -1,4 +1,5 @@
-﻿using MSSQL_to_MongoDB.Services;
+﻿using MSSQL_to_MongoDB.Helpers;
+using MSSQL_to_MongoDB.Services;
 using System;
 using System.Diagnostics;
 
@@ -41,36 +42,33 @@ namespace MSSQL_to_MongoDB
                     var stopwatch = new Stopwatch();
                     stopwatch.Start();
 
-                    Console.WriteLine("Importing SQL database to MongoDB schema...");
+                    LogHelper.Log("Importing SQL database to MongoDB schema...");
                     var importResult = sqlService.ImportToMongoScheme();
 
                     if (!importResult.IsSuccess)
                     {
-                        Console.WriteLine($"Importing failed: {importResult.Message}");
+                        LogHelper.Log($"Importing failed: {importResult.Message}");
                         PressToContinue();
                         return false;
                     }
 
                     var mongoDb = importResult.Data;
-                    Console.WriteLine("Succesfully imported");
+                    LogHelper.Log("Succesfully imported");
 
-                    Console.WriteLine($"Import | Total: {stopwatch.Elapsed}");
+                    LogHelper.Log($"Import | Time: {stopwatch.Elapsed}");
 
-                    Console.WriteLine("Converting and exporting to MongoDB...");
+                    LogHelper.Log("Converting and exporting to MongoDB...");
                     var exportResult = mongoService.Export(mongoDb);
 
                     if (!exportResult.IsSuccess)
                     {
-                        Console.WriteLine($"Converting and exporting failed: {exportResult.Message}");
+                        LogHelper.Log($"Converting and exporting failed: {exportResult.Message}");
                         PressToContinue();
                         return false;
                     }
 
-                    Console.WriteLine("Succesfully converted and exported");
-
-                    stopwatch.Stop();
-
-                    Console.WriteLine($"Convert & Export | Total: {stopwatch.Elapsed}");
+                    LogHelper.Log("Succesfully converted and exported");
+                    LogHelper.Log($"Convert & Export | Total time: {stopwatch.Elapsed}");
                     PressToContinue();
                     return true;
                 case ConsoleKey.D2:
