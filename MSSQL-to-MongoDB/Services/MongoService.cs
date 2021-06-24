@@ -1,6 +1,4 @@
-﻿using MongoDB.Bson;
-using MongoDB.Driver;
-using MSSQL_to_MongoDB.Extensions;
+﻿using MongoDB.Driver;
 using MSSQL_to_MongoDB.Helpers;
 using MSSQL_to_MongoDB.Models;
 using MSSQL_to_MongoDB.Models.MongoDB;
@@ -49,20 +47,6 @@ namespace MSSQL_to_MongoDB.Services
             }
         }
 
-        //public ActionResult ExportReferences(MONGO_DB_REF mongoDbRef)
-        //{
-        //    try
-        //    {
-        //        // Insert(Collections.COLLECTION, mongoDb.ATTRIBUTE);
-
-        //        return new ActionResult { IsSuccess = true };
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return ActionResultHelper.CreateErrorResult<string>(ex);
-        //    }
-        //}
-
         private List<User_REF> UpdateUserReferences(List<User> users)
         {
             var userRefs = new List<User_REF>();
@@ -84,7 +68,7 @@ namespace MSSQL_to_MongoDB.Services
             var platformsCollection = database.GetCollection<Platform>(Collections.PLATFORMS.ToString());
 
             var country = countriesCollection.Find(c => c.CountryCode == user.CountryCode).FirstOrDefault();
-            
+
             var movieFilterDef = new FilterDefinitionBuilder<Movie>();
             var movieFilter = movieFilterDef.In(x => x.MovieID, user.Favorites.Select(f => f.MovieID));
             var favorites = moviesCollection.Find(movieFilter).ToList();
