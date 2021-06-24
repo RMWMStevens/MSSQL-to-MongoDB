@@ -69,15 +69,15 @@ namespace MSSQL_to_MongoDB.Services
 
             var movies = new List<Movie>();
 
-            foreach (var movieId in movieIDs.Take(10))
+            foreach (var movieId in movieIDs.Take(50))
             {
                 var movieRowString = RunQuery($"SELECT Title, Age, MediaType, Runtime FROM MOVIES WHERE MovieID = {movieId} ORDER BY MovieID").First();
                 var ratingRowStrings = RunQuery($"SELECT RatingSite, Rating FROM MOVIE_RATINGS WHERE MovieID = {movieId}");
-                var countryRowStrings = RunQuery($@"SELECT C.CountryCode, C.Country FROM MOVIE_IN_COUNTRIES MC
-                                                    INNER JOIN COUNTRIES C ON C.CountryCode = MC.CountryCode
-                                                    WHERE MovieID = {movieId}");
+                //var countryRowStrings = RunQuery($@"SELECT C.CountryCode, C.Country FROM MOVIE_IN_COUNTRIES MC
+                //                                    INNER JOIN COUNTRIES C ON C.CountryCode = MC.CountryCode
+                //                                    WHERE MovieID = {movieId}");
 
-                movies.Add(movieRowString.ToMovie(ratingRowStrings, countryRowStrings));
+                movies.Add(movieRowString.ToMovie(ratingRowStrings));
             }
 
             return movies;
@@ -86,15 +86,7 @@ namespace MSSQL_to_MongoDB.Services
         private List<Platform> ImportPlatformsToMongoScheme()
         {
             var platformNames = RunQuery("SELECT Platform FROM PLATFORMS ORDER BY 1");
-
-            var platforms = new List<Platform>();
-
-            //foreach(var platformName in platformNames)
-            //{
-            //    var movieList = new List<Movie>();
-            //}
-
-            return platforms;
+            return platformNames.ToPlatforms();
         }
 
         private List<User> ImportUsersToMongoScheme()
@@ -102,6 +94,14 @@ namespace MSSQL_to_MongoDB.Services
             var userIDs = RunQuery("SELECT UserID FROM USERS ORDER BY 1").Select(int.Parse).ToList();
 
             var users = new List<User>();
+
+            foreach(var userId in userIDs.Take(50))
+            {
+                var userRowString = RunQuery($"SELECT FullName, Email, BirthDate, CountryCode, Sex FROM USERS WHERE UserID = {userId}").First();
+                var mediaTypeRowStrings = RunQuery($"SELECT MediaType FROM USER_MEDIA_TYPES WHERE UserID = {userId}");
+
+                users.Add(userRowString.ToUser(mediaTypeRowStrings));
+            }
 
             return users;
         }

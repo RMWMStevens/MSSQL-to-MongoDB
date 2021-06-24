@@ -3,8 +3,10 @@ using MSSQL_to_MongoDB.Helpers;
 using MSSQL_to_MongoDB.Models;
 using MSSQL_to_MongoDB.Models.MongoDB;
 using MSSQL_to_MongoDB.Models.MongoDB.Enums;
+using MSSQL_to_MongoDB.Models.MongoDB.References;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MSSQL_to_MongoDB.Services
 {
@@ -22,15 +24,16 @@ namespace MSSQL_to_MongoDB.Services
             return @"mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
         }
 
-        public ActionResult Export(MONGO_DB mongoDb)
+        public ActionResult ExportPrimaries(MONGO_DB mongoDb)
         {
             try
             {
-                Insert(Collections.MOVIES, mongoDb.Movies);
+                DropCollections();
 
-                //InsertOne(Collections.USERS, sqlDatabase.ToUsers().ToBsonDocument());
-                //InsertOne(Collections.MOVIES, movies.ToBsonDocument());
-                //InsertOne(Collections.PLATFORMS, sqlDatabase.ToPlatforms().ToBsonDocument());
+                Insert(Collections.COUNTRIES, mongoDb.Countries);
+                Insert(Collections.PLATFORMS, mongoDb.Platforms);
+                Insert(Collections.MOVIES, mongoDb.Movies);
+                Insert(Collections.USERS, mongoDb.Users);
 
                 return new ActionResult { IsSuccess = true };
             }
@@ -40,20 +43,41 @@ namespace MSSQL_to_MongoDB.Services
             }
         }
 
-        private void Insert<T>(Collections collectionName, T data)
+        public ActionResult ExportReferences(MONGO_DB_REF mongoDbRef)
         {
-            var mongoClient = new MongoClient(connectionString);
-            var database = mongoClient.GetDatabase(databaseName);
-            var collection = database.GetCollection<T>(collectionName.ToString());
-            collection.InsertOne(data);
+            try
+            {
+                // Insert(Collections.COLLECTION, mongoDb.ATTRIBUTE);
+
+                return new ActionResult { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                return ActionResultHelper.CreateErrorResult<string>(ex);
+            }
         }
 
         private void Insert<T>(Collections collectionName, List<T> list)
         {
-            var mongoClient = new MongoClient(connectionString);
-            var database = mongoClient.GetDatabase(databaseName);
+            var database = GetDatabase();
             var collection = database.GetCollection<T>(collectionName.ToString());
             collection.InsertMany(list);
+        }
+
+        private void DropCollections()
+        {
+            var database = GetDatabase();
+            var collections = (Collections[])Enum.GetValues(typeof(Collections));
+            foreach (var collection in collections)
+            {
+                database.DropCollection(collection.ToString());
+            }
+        }
+
+        private IMongoDatabase GetDatabase()
+        {
+            var mongoClient = new MongoClient(connectionString);
+            return mongoClient.GetDatabase(databaseName);
         }
     }
 }

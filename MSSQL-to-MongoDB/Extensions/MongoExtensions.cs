@@ -1,11 +1,13 @@
 ﻿using MSSQL_to_MongoDB.Models.MongoDB;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MSSQL_to_MongoDB.Extensions
 {
     public static class MongoExtensions
     {
-        public static Movie ToMovie(this string movieRowString, List<string> ratingRowStrings, List<string> countryRowStrings)
+        public static Movie ToMovie(this string movieRowString, List<string> ratingRowStrings)
         {
             var movieRowCols = movieRowString.Split('|');
 
@@ -16,7 +18,7 @@ namespace MSSQL_to_MongoDB.Extensions
                 MediaType = movieRowCols[2],
                 Runtime = int.Parse(movieRowCols[3]),
                 Ratings = ratingRowStrings.ToRatings(),
-                ReleasedInCountries = countryRowStrings.ToCountries()
+                //ReleasedInCountries // is a reference type, will be added later
             };
         }
 
@@ -64,6 +66,46 @@ namespace MSSQL_to_MongoDB.Extensions
                 CountryCode = countryRowCols[0],
                 CountryName = countryRowCols[1]
             };
+        }
+
+        public static List<Platform> ToPlatforms(this List<string> platformRowStrings)
+        {
+            var platforms = new List<Platform>();
+
+            foreach(var platformRowString in platformRowStrings)
+            {
+                platforms.Add(platformRowString.ToPlatform());
+            }
+
+            return platforms;
+        }
+
+        public static Platform ToPlatform(this string platformName)
+        {
+            return new Platform
+            {
+                PlatformName = platformName
+            };
+        }
+
+        public static User ToUser(this string userRowString, List<string> mediaTypeRowStrings)
+        {
+            var userRowCols = userRowString.Split('|');
+
+            return new User
+            {
+                FullName = userRowCols[0],
+                Email = userRowCols[1],
+                BirthDate = DateTime.Parse(userRowCols[2]),
+                CountryCode = userRowCols[3],
+                Sex = userRowCols[4],
+                MediaTypes = mediaTypeRowStrings.ToMediaTypes()
+            };
+        }
+
+        public static List<string> ToMediaTypes(this List<string> mediaTypeRowStrings)
+        {
+            return mediaTypeRowStrings.SelectMany(t => t.Split('|')).ToList();
         }
     }
 }

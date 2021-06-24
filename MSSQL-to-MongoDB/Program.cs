@@ -8,8 +8,6 @@ namespace MSSQL_to_MongoDB
         private static readonly SqlService sqlService = new SqlService();
         private static readonly MongoService mongoService = new MongoService();
 
-        private static bool completed = false;
-
         static void Main(string[] args)
         {
             sqlService.LoadOnStartup();
@@ -39,13 +37,6 @@ namespace MSSQL_to_MongoDB
             switch (key)
             {
                 case ConsoleKey.D1:
-                    if (completed)
-                    {
-                        Console.WriteLine("Import already complete, it is not advisable to run it again");
-                        PressToContinue();
-                        return false;
-                    }
-
                     Console.WriteLine("Importing SQL database to MongoDB schema...");
                     //var importResult = sqlService.ImportDatabase();
                     var importResult = sqlService.ImportToMongoScheme();
@@ -56,9 +47,11 @@ namespace MSSQL_to_MongoDB
                         PressToContinue();
                         return false;
                     }
+
+                    var mongoDb = importResult.Data;
                     Console.WriteLine("Succesfully imported");
                     Console.WriteLine("Converting and exporting to MongoDB...");
-                    var exportResult = mongoService.Export(importResult.Data);
+                    var exportResult = mongoService.ExportPrimaries(mongoDb);
 
                     if (!exportResult.IsSuccess)
                     {
@@ -68,7 +61,7 @@ namespace MSSQL_to_MongoDB
                     }
 
                     Console.WriteLine("Succesfully converted and exported");
-                    completed = true;
+
                     PressToContinue();
                     return true;
                 case ConsoleKey.D2:

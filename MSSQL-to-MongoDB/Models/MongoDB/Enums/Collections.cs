@@ -2,6 +2,7 @@
 {
     public enum Collections
     {
+        COUNTRIES,
         MOVIES,
         PLATFORMS,
         USERS

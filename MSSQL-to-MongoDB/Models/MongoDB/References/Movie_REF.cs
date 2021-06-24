@@ -2,9 +2,9 @@
 using MongoDB.Bson.Serialization.Attributes;
 using System.Collections.Generic;
 
-namespace MSSQL_to_MongoDB.Models.MongoDB
+namespace MSSQL_to_MongoDB.Models.MongoDB.References
 {
-    public class Movie
+    public class Movie_REF
     {
         [BsonId]
         public ObjectId Id { get; set; }
@@ -12,9 +12,7 @@ namespace MSSQL_to_MongoDB.Models.MongoDB
         public string Age { get; set; }
         public string MediaType { get; set; }
         public int Runtime { get; set; }
-        [BsonIgnore]
-        public List<Country> ReleasedInCountries { get; set; }
-        [BsonIgnore]
+        public List<ObjectId> ReleasedInCountries { get; set; }
         public List<MovieRating> Ratings { get; set; }
     }
 }

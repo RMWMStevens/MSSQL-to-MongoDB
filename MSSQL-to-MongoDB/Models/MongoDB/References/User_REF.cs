@@ -3,22 +3,19 @@ using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
 
-namespace MSSQL_to_MongoDB.Models.MongoDB
+namespace MSSQL_to_MongoDB.Models.MongoDB.References
 {
-    public class User
+    public class User_REF
     {
         [BsonId]
         public ObjectId Id { get; set; }
         public string FullName { get; set; }
         public string Email { get; set; }
         public DateTime BirthDate { get; set; }
-        [BsonIgnore]
-        public string CountryCode { get; set; }
+        public ObjectId Country { get; set; }
         public string Sex { get; set; }
-        [BsonIgnore]
-        public List<Platform> Platforms { get; set; }
+        public List<ObjectId> Platforms { get; set; }
         public List<string> MediaTypes { get; set; }
-        [BsonIgnore]
-        public List<Movie> Favorites { get; set; }
+        public List<ObjectId> Favorites { get; set; }
     }
 }
