@@ -54,7 +54,7 @@ namespace MSSQL_to_MongoDB
                     var mongoDb = importResult.Data;
                     Console.WriteLine("Succesfully imported");
 
-                    Console.WriteLine(stopwatch.Elapsed);
+                    Console.WriteLine($"Import | Total: {stopwatch.Elapsed}");
 
                     Console.WriteLine("Converting and exporting to MongoDB...");
                     var exportResult = mongoService.ExportPrimaries(mongoDb);
@@ -70,7 +70,7 @@ namespace MSSQL_to_MongoDB
 
                     stopwatch.Stop();
 
-                    Console.WriteLine(stopwatch.Elapsed);
+                    Console.WriteLine($"Convert & Export | Total: {stopwatch.Elapsed}");
                     PressToContinue();
                     return true;
                 case ConsoleKey.D2:

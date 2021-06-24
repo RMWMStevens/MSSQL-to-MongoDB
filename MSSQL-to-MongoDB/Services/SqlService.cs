@@ -46,6 +46,7 @@ namespace MSSQL_to_MongoDB.Services
 
         private List<Country> ImportCountriesToMongoScheme()
         {
+            Console.WriteLine($"SqlService - Importing COUNTRIES");
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -65,13 +66,14 @@ namespace MSSQL_to_MongoDB.Services
             }
 
             stopwatch.Stop();
-            Console.WriteLine($"Countries: {stopwatch.Elapsed}");
+            Console.WriteLine($"SqlService - Import complete | Delta: {stopwatch.Elapsed}");
 
             return countries;
         }
 
         private List<Movie> ImportMoviesToMongoScheme()
         {
+            Console.WriteLine($"SqlService - Importing MOVIES");
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -79,7 +81,7 @@ namespace MSSQL_to_MongoDB.Services
 
             var movies = new List<Movie>();
 
-            foreach (var movieId in movieIDs.Take(5000))
+            foreach (var movieId in movieIDs.Take(100))
             {
                 var movieRowString = RunQuery($"SELECT Title, Age, MediaType, Runtime FROM MOVIES WHERE MovieID = {movieId} ORDER BY MovieID").First();
                 var ratingRowStrings = RunQuery($"SELECT RatingSite, Rating FROM MOVIE_RATINGS WHERE MovieID = {movieId}");
@@ -91,19 +93,28 @@ namespace MSSQL_to_MongoDB.Services
             }
 
             stopwatch.Stop();
-            Console.WriteLine($"Movies: {stopwatch.Elapsed}");
+            Console.WriteLine($"SqlService - Import complete | Delta: {stopwatch.Elapsed}");
 
             return movies;
         }
 
         private List<Platform> ImportPlatformsToMongoScheme()
         {
+            Console.WriteLine($"SqlService - Importing PLATFORMS");
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             var platformNames = RunQuery("SELECT Platform FROM PLATFORMS ORDER BY 1");
+
+            stopwatch.Stop();
+            Console.WriteLine($"SqlService - Import complete | Delta: {stopwatch.Elapsed}");
+
             return platformNames.ToPlatforms();
         }
 
         private List<User> ImportUsersToMongoScheme()
         {
+            Console.WriteLine($"SqlService - Importing USERS");
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -111,7 +122,7 @@ namespace MSSQL_to_MongoDB.Services
 
             var users = new List<User>();
 
-            foreach (var userId in userIDs.Take(5000))
+            foreach (var userId in userIDs.Take(100))
             {
                 var userRowString = RunQuery($"SELECT FullName, Email, BirthDate, CountryCode, Sex FROM USERS WHERE UserID = {userId}").First();
                 var favoriteMovieRowStrings = RunQuery(@$"  SELECT Title, Age, MediaType, Runtime
@@ -127,7 +138,7 @@ namespace MSSQL_to_MongoDB.Services
             }
 
             stopwatch.Stop();
-            Console.WriteLine($"Users: {stopwatch.Elapsed}");
+            Console.WriteLine($"SqlService - Import complete | Delta: {stopwatch.Elapsed}");
 
             return users;
         }

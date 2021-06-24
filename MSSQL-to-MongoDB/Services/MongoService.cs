@@ -58,6 +58,7 @@ namespace MSSQL_to_MongoDB.Services
 
         private void Insert<T>(Collections collectionName, List<T> list)
         {
+            Console.WriteLine($"MongoService - Exporting {collectionName}");
             var database = GetDatabase();
             var collection = database.GetCollection<T>(collectionName.ToString());
             collection.InsertMany(list);
@@ -65,6 +66,7 @@ namespace MSSQL_to_MongoDB.Services
 
         private void DropCollections()
         {
+            Console.WriteLine("MongoService - Dropping collections");
             var database = GetDatabase();
             var collections = (Collections[])Enum.GetValues(typeof(Collections));
             foreach (var collection in collections)
