@@ -1,11 +1,10 @@
-﻿using MongoDB.Bson;
-using MongoDB.Driver;
-using MSSQL_to_MongoDB.Extensions;
+﻿using MongoDB.Driver;
 using MSSQL_to_MongoDB.Helpers;
 using MSSQL_to_MongoDB.Models;
+using MSSQL_to_MongoDB.Models.MongoDB;
 using MSSQL_to_MongoDB.Models.MongoDB.Enums;
-using MSSQL_to_MongoDB.Models.MSSQL;
 using System;
+using System.Collections.Generic;
 
 namespace MSSQL_to_MongoDB.Services
 {
@@ -23,14 +22,15 @@ namespace MSSQL_to_MongoDB.Services
             return @"mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
         }
 
-        public ActionResult Export(MSSQL sqlDatabase)
+        public ActionResult Export(MONGO_DB mongoDb)
         {
             try
             {
-                var movies = sqlDatabase.ToMovies();
-                //Insert(Collections.USERS, sqlDatabase.ToUsers().ToBsonDocument());
-                Insert(Collections.MOVIES, movies.ToBsonDocument());
-                //Insert(Collections.PLATFORMS, sqlDatabase.ToPlatforms().ToBsonDocument());
+                Insert(Collections.MOVIES, mongoDb.Movies);
+
+                //InsertOne(Collections.USERS, sqlDatabase.ToUsers().ToBsonDocument());
+                //InsertOne(Collections.MOVIES, movies.ToBsonDocument());
+                //InsertOne(Collections.PLATFORMS, sqlDatabase.ToPlatforms().ToBsonDocument());
 
                 return new ActionResult { IsSuccess = true };
             }
@@ -40,12 +40,20 @@ namespace MSSQL_to_MongoDB.Services
             }
         }
 
-        private void Insert(Collections collectionName, BsonDocument bsonDocument)
+        private void Insert<T>(Collections collectionName, T data)
         {
             var mongoClient = new MongoClient(connectionString);
             var database = mongoClient.GetDatabase(databaseName);
-            var collection = database.GetCollection<BsonDocument>(collectionName.ToString());
-            collection.InsertOne(bsonDocument);
+            var collection = database.GetCollection<T>(collectionName.ToString());
+            collection.InsertOne(data);
+        }
+
+        private void Insert<T>(Collections collectionName, List<T> list)
+        {
+            var mongoClient = new MongoClient(connectionString);
+            var database = mongoClient.GetDatabase(databaseName);
+            var collection = database.GetCollection<T>(collectionName.ToString());
+            collection.InsertMany(list);
         }
     }
 }

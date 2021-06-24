@@ -46,28 +46,28 @@ namespace MSSQL_to_MongoDB
                         return false;
                     }
 
-                    Console.WriteLine("Importing from MSSQL...");
-                    var importResult = sqlService.ImportDatabase();
+                    Console.WriteLine("Importing SQL database to MongoDB schema...");
+                    //var importResult = sqlService.ImportDatabase();
+                    var importResult = sqlService.ImportToMongoScheme();
 
                     if (!importResult.IsSuccess)
                     {
-                        Console.WriteLine($"Import failed: {importResult.Message}");
+                        Console.WriteLine($"Importing failed: {importResult.Message}");
                         PressToContinue();
                         return false;
                     }
-
-                    Console.WriteLine("Import succesful");
-                    Console.WriteLine("Exporting to MongoDB...");
+                    Console.WriteLine("Succesfully imported");
+                    Console.WriteLine("Converting and exporting to MongoDB...");
                     var exportResult = mongoService.Export(importResult.Data);
 
                     if (!exportResult.IsSuccess)
                     {
-                        Console.WriteLine($"Export failed: {exportResult.Message}");
+                        Console.WriteLine($"Converting and exporting failed: {exportResult.Message}");
                         PressToContinue();
                         return false;
                     }
 
-                    Console.WriteLine("Export succesful");
+                    Console.WriteLine("Succesfully converted and exported");
                     completed = true;
                     PressToContinue();
                     return true;

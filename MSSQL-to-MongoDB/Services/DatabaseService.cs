@@ -6,8 +6,8 @@ namespace MSSQL_to_MongoDB.Services
 {
     public abstract class DatabaseService
     {
-        protected static string connectionString;
-        public static string ConnectionString { get { return connectionString; } }
+        protected string connectionString;
+        public string ConnectionString { get { return connectionString; } }
 
         protected DatabaseSystem system;
         public DatabaseSystem System { get { return system; } }
