@@ -1,5 +1,6 @@
 ﻿using MSSQL_to_MongoDB.Services;
 using System;
+using System.Diagnostics;
 
 namespace MSSQL_to_MongoDB
 {
@@ -37,8 +38,10 @@ namespace MSSQL_to_MongoDB
             switch (key)
             {
                 case ConsoleKey.D1:
+                    var stopwatch = new Stopwatch();
+                    stopwatch.Start();
+
                     Console.WriteLine("Importing SQL database to MongoDB schema...");
-                    //var importResult = sqlService.ImportDatabase();
                     var importResult = sqlService.ImportToMongoScheme();
 
                     if (!importResult.IsSuccess)
@@ -50,6 +53,9 @@ namespace MSSQL_to_MongoDB
 
                     var mongoDb = importResult.Data;
                     Console.WriteLine("Succesfully imported");
+                    
+                    Console.WriteLine(stopwatch.Elapsed);
+                    
                     Console.WriteLine("Converting and exporting to MongoDB...");
                     var exportResult = mongoService.ExportPrimaries(mongoDb);
 
@@ -62,6 +68,9 @@ namespace MSSQL_to_MongoDB
 
                     Console.WriteLine("Succesfully converted and exported");
 
+                    stopwatch.Stop();
+
+                    Console.WriteLine(stopwatch.Elapsed);
                     PressToContinue();
                     return true;
                 case ConsoleKey.D2:

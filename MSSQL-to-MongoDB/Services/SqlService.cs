@@ -69,7 +69,7 @@ namespace MSSQL_to_MongoDB.Services
 
             var movies = new List<Movie>();
 
-            foreach (var movieId in movieIDs.Take(50))
+            foreach (var movieId in movieIDs)
             {
                 var movieRowString = RunQuery($"SELECT Title, Age, MediaType, Runtime FROM MOVIES WHERE MovieID = {movieId} ORDER BY MovieID").First();
                 var ratingRowStrings = RunQuery($"SELECT RatingSite, Rating FROM MOVIE_RATINGS WHERE MovieID = {movieId}");
@@ -95,7 +95,7 @@ namespace MSSQL_to_MongoDB.Services
 
             var users = new List<User>();
 
-            foreach(var userId in userIDs.Take(50))
+            foreach(var userId in userIDs)
             {
                 var userRowString = RunQuery($"SELECT FullName, Email, BirthDate, CountryCode, Sex FROM USERS WHERE UserID = {userId}").First();
                 var mediaTypeRowStrings = RunQuery($"SELECT MediaType FROM USER_MEDIA_TYPES WHERE UserID = {userId}");
