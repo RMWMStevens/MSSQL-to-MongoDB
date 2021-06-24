@@ -53,9 +53,9 @@ namespace MSSQL_to_MongoDB
 
                     var mongoDb = importResult.Data;
                     Console.WriteLine("Succesfully imported");
-                    
+
                     Console.WriteLine(stopwatch.Elapsed);
-                    
+
                     Console.WriteLine("Converting and exporting to MongoDB...");
                     var exportResult = mongoService.ExportPrimaries(mongoDb);
 

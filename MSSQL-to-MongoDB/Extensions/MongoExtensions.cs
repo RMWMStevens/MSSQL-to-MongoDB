@@ -7,7 +7,19 @@ namespace MSSQL_to_MongoDB.Extensions
 {
     public static class MongoExtensions
     {
-        public static Movie ToMovie(this string movieRowString, List<string> ratingRowStrings)
+        public static List<Movie> ToMoviesWithoutRatingsAndCountries(this List<string> movieRowStrings)
+        {
+            var movies = new List<Movie>();
+
+            foreach (var movieRowString in movieRowStrings)
+            {
+                movies.Add(movieRowString.ToMovie(new List<string>(), new List<string>()));
+            }
+
+            return movies;
+        }
+
+        public static Movie ToMovie(this string movieRowString, List<string> ratingRowStrings, List<string> countryRowStrings)
         {
             var movieRowCols = movieRowString.Split('|');
 
@@ -18,7 +30,7 @@ namespace MSSQL_to_MongoDB.Extensions
                 MediaType = movieRowCols[2],
                 Runtime = int.Parse(movieRowCols[3]),
                 Ratings = ratingRowStrings.ToRatings(),
-                //ReleasedInCountries // is a reference type, will be added later
+                ReleasedInCountries = countryRowStrings.ToCountries()
             };
         }
 
@@ -68,11 +80,11 @@ namespace MSSQL_to_MongoDB.Extensions
             };
         }
 
-        public static List<Platform> ToPlatforms(this List<string> platformRowStrings)
+        public static List<Platform> ToPlatforms(this List<string> platformStrings)
         {
             var platforms = new List<Platform>();
 
-            foreach(var platformRowString in platformRowStrings)
+            foreach (var platformRowString in platformStrings)
             {
                 platforms.Add(platformRowString.ToPlatform());
             }
@@ -80,15 +92,9 @@ namespace MSSQL_to_MongoDB.Extensions
             return platforms;
         }
 
-        public static Platform ToPlatform(this string platformName)
-        {
-            return new Platform
-            {
-                PlatformName = platformName
-            };
-        }
+        public static Platform ToPlatform(this string platformName) => new Platform { PlatformName = platformName };
 
-        public static User ToUser(this string userRowString, List<string> mediaTypeRowStrings)
+        public static User ToUser(this string userRowString, List<string> favoriteMovieRowStrings, List<string> platformStrings, List<string> mediaTypeStrings)
         {
             var userRowCols = userRowString.Split('|');
 
@@ -99,13 +105,15 @@ namespace MSSQL_to_MongoDB.Extensions
                 BirthDate = DateTime.Parse(userRowCols[2]),
                 CountryCode = userRowCols[3],
                 Sex = userRowCols[4],
-                MediaTypes = mediaTypeRowStrings.ToMediaTypes()
+                MediaTypes = mediaTypeStrings.ToMediaTypes(),
+                Platforms = platformStrings.ToPlatforms(),
+                Favorites = favoriteMovieRowStrings.ToMoviesWithoutRatingsAndCountries()
             };
         }
 
-        public static List<string> ToMediaTypes(this List<string> mediaTypeRowStrings)
+        public static List<string> ToMediaTypes(this List<string> mediaTypeStrings)
         {
-            return mediaTypeRowStrings.SelectMany(t => t.Split('|')).ToList();
+            return mediaTypeStrings.SelectMany(t => t.Split('|')).ToList();
         }
     }
 }

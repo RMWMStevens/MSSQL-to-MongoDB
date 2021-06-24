@@ -1,7 +1,4 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-
-namespace MSSQL_to_MongoDB.Models.MongoDB
+﻿namespace MSSQL_to_MongoDB.Models.MongoDB
 {
     public class MovieRating
     {
