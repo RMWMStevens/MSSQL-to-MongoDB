@@ -8,6 +8,7 @@ namespace MSSQL_to_MongoDB.Models.MongoDB
     {
         [BsonId]
         public ObjectId Id { get; set; }
+        public int MovieID { get; set; }
         public string Title { get; set; }
         public string Age { get; set; }
         public string MediaType { get; set; }

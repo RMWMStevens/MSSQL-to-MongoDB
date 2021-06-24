@@ -50,25 +50,12 @@ namespace MSSQL_to_MongoDB.Services
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var countryCodes = RunQuery("SELECT CountryCode FROM COUNTRIES ORDER BY 1");
-
-            var countries = new List<Country>();
-
-            foreach (var countryCode in countryCodes)
-            {
-                var countryName = RunQuery($"SELECT Country FROM COUNTRIES WHERE CountryCode = '{countryCode}'").First();
-
-                countries.Add(new Country
-                {
-                    CountryCode = countryCode,
-                    CountryName = countryName
-                });
-            }
+            var countryRowStrings = RunQuery("SELECT CountryCode, Country FROM COUNTRIES ORDER BY 1");
 
             stopwatch.Stop();
             Console.WriteLine($"SqlService - Import complete | Delta: {stopwatch.Elapsed}");
 
-            return countries;
+            return countryRowStrings.ToCountries();
         }
 
         private List<Movie> ImportMoviesToMongoScheme()
@@ -81,11 +68,11 @@ namespace MSSQL_to_MongoDB.Services
 
             var movies = new List<Movie>();
 
-            foreach (var movieId in movieIDs.Take(100))
+            foreach (var movieId in movieIDs.Take(10))
             {
-                var movieRowString = RunQuery($"SELECT Title, Age, MediaType, Runtime FROM MOVIES WHERE MovieID = {movieId} ORDER BY MovieID").First();
+                var movieRowString = RunQuery($"SELECT Title, Age, MediaType, Runtime, MovieID FROM MOVIES WHERE MovieID = {movieId} ORDER BY MovieID").First();
                 var ratingRowStrings = RunQuery($"SELECT RatingSite, Rating FROM MOVIE_RATINGS WHERE MovieID = {movieId}");
-                var countryRowStrings = RunQuery($@"SELECT C.CountryCode, C.Country FROM MOVIE_IN_COUNTRIES MC
+                var countryRowStrings = RunQuery($@"SELECT C.CountryCode, C.Country, MovieID FROM MOVIE_IN_COUNTRIES MC
                                                     INNER JOIN COUNTRIES C ON C.CountryCode = MC.CountryCode
                                                     WHERE MovieID = {movieId}");
 
@@ -122,10 +109,10 @@ namespace MSSQL_to_MongoDB.Services
 
             var users = new List<User>();
 
-            foreach (var userId in userIDs.Take(100))
+            foreach (var userId in userIDs.Skip(1).Take(10))
             {
-                var userRowString = RunQuery($"SELECT FullName, Email, BirthDate, CountryCode, Sex FROM USERS WHERE UserID = {userId}").First();
-                var favoriteMovieRowStrings = RunQuery(@$"  SELECT Title, Age, MediaType, Runtime
+                var userRowString = RunQuery($"SELECT FullName, Email, BirthDate, CountryCode, Sex, UserID FROM USERS WHERE UserID = {userId}").First();
+                var favoriteMovieRowStrings = RunQuery(@$"  SELECT Title, Age, MediaType, Runtime, M.MovieID
                                                             FROM MOVIES M
                                                             INNER JOIN FAVORITE_MOVIES_PER_USER F
 	                                                            ON M.MovieID = F.MovieID

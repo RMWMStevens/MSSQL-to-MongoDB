@@ -9,6 +9,7 @@ namespace MSSQL_to_MongoDB.Models.MongoDB
     {
         [BsonId]
         public ObjectId Id { get; set; }
+        public int UserID { get; set; }
         public string FullName { get; set; }
         public string Email { get; set; }
         public DateTime BirthDate { get; set; }

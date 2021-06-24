@@ -30,7 +30,8 @@ namespace MSSQL_to_MongoDB.Extensions
                 MediaType = movieRowCols[2],
                 Runtime = int.Parse(movieRowCols[3]),
                 Ratings = ratingRowStrings.ToRatings(),
-                ReleasedInCountries = countryRowStrings.ToCountries()
+                ReleasedInCountries = countryRowStrings.ToCountries(),
+                MovieID = int.Parse(movieRowCols[4]),
             };
         }
 
