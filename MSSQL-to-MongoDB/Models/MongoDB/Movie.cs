@@ -17,5 +17,6 @@ namespace MSSQL_to_MongoDB.Models.MongoDB
         public List<Country> ReleasedInCountries { get; set; }
         [BsonIgnore]
         public List<MovieRating> Ratings { get; set; }
+        public List<string> Platforms { get; set; }
     }
 }

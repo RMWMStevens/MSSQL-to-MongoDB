@@ -16,8 +16,7 @@ namespace MSSQL_to_MongoDB.Models.MongoDB
         [BsonIgnore]
         public string CountryCode { get; set; }
         public string Sex { get; set; }
-        [BsonIgnore]
-        public List<Platform> Platforms { get; set; }
+        public List<string> Platforms { get; set; }
         public List<string> MediaTypes { get; set; }
         [BsonIgnore]
         public List<Movie> Favorites { get; set; }

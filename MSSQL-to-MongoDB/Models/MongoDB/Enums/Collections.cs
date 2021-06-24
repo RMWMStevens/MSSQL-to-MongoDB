@@ -4,7 +4,6 @@
     {
         COUNTRIES,
         MOVIES,
-        PLATFORMS,
         USERS
     }
 }

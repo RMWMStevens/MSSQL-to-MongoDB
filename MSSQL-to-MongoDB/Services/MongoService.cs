@@ -31,11 +31,14 @@ namespace MSSQL_to_MongoDB.Services
                 DropCollections();
 
                 Insert(Collections.COUNTRIES, mongoDb.Countries);
-                Insert(Collections.PLATFORMS, mongoDb.Platforms);
                 Insert(Collections.MOVIES, mongoDb.Movies);
                 Insert(Collections.USERS, mongoDb.Users);
 
-                var userRefs = UpdateUserReferences(mongoDb.Users);
+                var movieRefs = GetMovieReferences(mongoDb.Movies);
+                DropCollection(Collections.MOVIES);
+                Insert(Collections.MOVIES, movieRefs);
+
+                var userRefs = GetUserReferences(mongoDb.Users);
                 DropCollection(Collections.USERS);
                 Insert(Collections.USERS, userRefs);
 
@@ -47,9 +50,47 @@ namespace MSSQL_to_MongoDB.Services
             }
         }
 
-        private List<User_REF> UpdateUserReferences(List<User> users)
+        private List<Movie_REF> GetMovieReferences(List<Movie> movies)
+        {
+            var movieRefs = new List<Movie_REF>();
+
+            Console.WriteLine($"MongoService - Getting MOVIE references");
+
+            foreach (var movie in movies)
+            {
+                movieRefs.Add(GetMovieReferences(movie));
+            }
+
+            return movieRefs;
+        }
+
+        private Movie_REF GetMovieReferences(Movie movie)
+        {
+            var database = GetDatabase();
+            var countriesCollection = database.GetCollection<Country>(Collections.COUNTRIES.ToString());
+
+            var movieFilterDef = new FilterDefinitionBuilder<Country>();
+            var movieFilter = movieFilterDef.In(x => x.CountryCode, movie.ReleasedInCountries.Select(f => f.CountryCode));
+            var releasedInCountries = countriesCollection.Find(movieFilter).ToList();
+
+            return new Movie_REF
+            {
+                Id = movie.Id,
+                Title = movie.Title,
+                Age = movie.Age,
+                MediaType = movie.MediaType,
+                Runtime = movie.Runtime,
+                Ratings = movie.Ratings,
+                Platforms = movie.Platforms,
+                ReleasedInCountries = releasedInCountries.Select(x => x.Id).ToList()
+            };
+        }
+
+        private List<User_REF> GetUserReferences(List<User> users)
         {
             var userRefs = new List<User_REF>();
+
+            Console.WriteLine($"MongoService - Getting USER references");
 
             foreach (var user in users)
             {
@@ -62,20 +103,14 @@ namespace MSSQL_to_MongoDB.Services
         private User_REF GetUserReferences(User user)
         {
             var database = GetDatabase();
-            var usersCollection = database.GetCollection<User>(Collections.USERS.ToString());
             var countriesCollection = database.GetCollection<Country>(Collections.COUNTRIES.ToString());
             var moviesCollection = database.GetCollection<Movie>(Collections.MOVIES.ToString());
-            var platformsCollection = database.GetCollection<Platform>(Collections.PLATFORMS.ToString());
 
             var country = countriesCollection.Find(c => c.CountryCode == user.CountryCode).FirstOrDefault();
 
             var movieFilterDef = new FilterDefinitionBuilder<Movie>();
             var movieFilter = movieFilterDef.In(x => x.MovieID, user.Favorites.Select(f => f.MovieID));
             var favorites = moviesCollection.Find(movieFilter).ToList();
-
-            var platformFilterDef = new FilterDefinitionBuilder<Platform>();
-            var platformFilter = platformFilterDef.In(x => x.PlatformName, user.Platforms.Select(p => p.PlatformName));
-            var platforms = platformsCollection.Find(platformFilter).ToList();
 
             return new User_REF
             {
@@ -86,8 +121,8 @@ namespace MSSQL_to_MongoDB.Services
                 MediaTypes = user.MediaTypes,
                 Sex = user.Sex,
                 Country = country.Id,
+                Platforms = user.Platforms,
                 Favorites = favorites.Select(x => x.Id).ToList(),
-                Platforms = platforms.Select(x => x.Id).ToList(),
             };
         }
 

@@ -7,19 +7,21 @@ namespace MSSQL_to_MongoDB.Extensions
 {
     public static class MongoExtensions
     {
-        public static List<Movie> ToMoviesWithoutRatingsAndCountries(this List<string> movieRowStrings)
+        public static List<Movie> ToMoviesWithoutRatingsCountriesPlatforms(this List<string> movieRowStrings)
         {
             var movies = new List<Movie>();
 
+            var emptyList = new List<string>();
+
             foreach (var movieRowString in movieRowStrings)
             {
-                movies.Add(movieRowString.ToMovie(new List<string>(), new List<string>()));
+                movies.Add(movieRowString.ToMovie(emptyList, emptyList, emptyList));
             }
 
             return movies;
         }
 
-        public static Movie ToMovie(this string movieRowString, List<string> ratingRowStrings, List<string> countryRowStrings)
+        public static Movie ToMovie(this string movieRowString, List<string> ratingRowStrings, List<string> countryRowStrings, List<string> platformStrings)
         {
             var movieRowCols = movieRowString.Split('|');
 
@@ -32,6 +34,7 @@ namespace MSSQL_to_MongoDB.Extensions
                 Ratings = ratingRowStrings.ToRatings(),
                 ReleasedInCountries = countryRowStrings.ToCountries(),
                 MovieID = int.Parse(movieRowCols[4]),
+                Platforms = platformStrings,
             };
         }
 
@@ -81,20 +84,6 @@ namespace MSSQL_to_MongoDB.Extensions
             };
         }
 
-        public static List<Platform> ToPlatforms(this List<string> platformStrings)
-        {
-            var platforms = new List<Platform>();
-
-            foreach (var platformRowString in platformStrings)
-            {
-                platforms.Add(platformRowString.ToPlatform());
-            }
-
-            return platforms;
-        }
-
-        public static Platform ToPlatform(this string platformName) => new Platform { PlatformName = platformName };
-
         public static User ToUser(this string userRowString, List<string> favoriteMovieRowStrings, List<string> platformStrings, List<string> mediaTypeStrings)
         {
             var userRowCols = userRowString.Split('|');
@@ -107,8 +96,8 @@ namespace MSSQL_to_MongoDB.Extensions
                 CountryCode = userRowCols[3],
                 Sex = userRowCols[4],
                 MediaTypes = mediaTypeStrings.ToMediaTypes(),
-                Platforms = platformStrings.ToPlatforms(),
-                Favorites = favoriteMovieRowStrings.ToMoviesWithoutRatingsAndCountries()
+                Platforms = platformStrings,
+                Favorites = favoriteMovieRowStrings.ToMoviesWithoutRatingsCountriesPlatforms()
             };
         }
 

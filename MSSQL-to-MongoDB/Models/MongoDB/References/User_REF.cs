@@ -14,7 +14,7 @@ namespace MSSQL_to_MongoDB.Models.MongoDB.References
         public DateTime BirthDate { get; set; }
         public ObjectId Country { get; set; }
         public string Sex { get; set; }
-        public List<ObjectId> Platforms { get; set; }
+        public List<string> Platforms { get; set; }
         public List<string> MediaTypes { get; set; }
         public List<ObjectId> Favorites { get; set; }
     }

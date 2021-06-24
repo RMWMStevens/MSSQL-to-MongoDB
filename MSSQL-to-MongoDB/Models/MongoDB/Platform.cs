@@ -9,7 +9,5 @@ namespace MSSQL_to_MongoDB.Models.MongoDB
         [BsonId]
         public ObjectId Id { get; set; }
         public string PlatformName { get; set; }
-        [BsonIgnore]
-        public List<Movie> Movies { get; set; }
     }
 }

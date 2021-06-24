@@ -14,5 +14,6 @@ namespace MSSQL_to_MongoDB.Models.MongoDB.References
         public int Runtime { get; set; }
         public List<ObjectId> ReleasedInCountries { get; set; }
         public List<MovieRating> Ratings { get; set; }
+        public List<string> Platforms { get; set; }
     }
 }
