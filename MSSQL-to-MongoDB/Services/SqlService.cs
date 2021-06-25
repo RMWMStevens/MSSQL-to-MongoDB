@@ -5,8 +5,8 @@ using MSSQL_to_MongoDB.Models.MongoDB;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MSSQL_to_MongoDB.Services
 {
@@ -25,15 +25,15 @@ namespace MSSQL_to_MongoDB.Services
             return $"For SQL Authentication: \n{sqlAuth}\nFor Windows Authentication (leave 'SSPI' as is): \n{winAuth}";
         }
 
-        public ActionResult<MONGO_DB> ImportToMongoScheme()
+        public async Task<ActionResult<MONGO_DB>> ImportToMongoSchemaAsync()
         {
             try
             {
                 var mongoDb = new MONGO_DB
                 {
-                    Countries = ImportCountriesToMongoScheme(),
-                    Movies = ImportMoviesToMongoScheme(),
-                    Users = ImportUsersToMongoScheme(),
+                    Countries = await ImportCountriesToMongoSchemaAsync(),
+                    Movies = await ImportMoviesToMongoSchemaAsync(),
+                    Users = await ImportUsersToMongoSchemaAsync(),
                 };
                 return ActionResultHelper.CreateSuccessResult(mongoDb);
             }
@@ -43,81 +43,111 @@ namespace MSSQL_to_MongoDB.Services
             }
         }
 
-        private List<Country> ImportCountriesToMongoScheme()
+        private async Task<List<Country>> ImportCountriesToMongoSchemaAsync()
         {
             LogHelper.Log("Importing COUNTRIES", nameof(SqlService));
 
-            var countryRowStrings = RunQuery("SELECT CountryCode, Country FROM COUNTRIES ORDER BY 1");
+            var countryRowStrings = await RunQueryAsync("SELECT CountryCode, Country FROM COUNTRIES ORDER BY 1");
 
             LogHelper.Log("Import complete", nameof(SqlService));
 
             return countryRowStrings.ToCountries();
         }
 
-        private List<Movie> ImportMoviesToMongoScheme()
+        private async Task<List<Movie>> ImportMoviesToMongoSchemaAsync()
         {
             LogHelper.Log("Importing MOVIES", nameof(SqlService));
 
-            var movieIDs = RunQuery("SELECT MovieID FROM MOVIES ORDER BY 1").Select(int.Parse).ToList();
+            var movieIDs = (await RunQueryAsync("SELECT MovieID FROM MOVIES ORDER BY 1")).Select(int.Parse).ToList();
 
-            var movies = new List<Movie>();
+            var movieTasks = new List<Task<Movie>>();
 
             foreach (var movieId in movieIDs)
             {
-                var movieRowString = RunQuery($"SELECT Title, Age, MediaType, Runtime, MovieID FROM MOVIES WHERE MovieID = {movieId} ORDER BY MovieID").First();
-                var ratingRowStrings = RunQuery($"SELECT RatingSite, Rating FROM MOVIE_RATINGS WHERE MovieID = {movieId}");
-                var countryRowStrings = RunQuery($@"SELECT C.CountryCode, C.Country, MovieID FROM MOVIE_IN_COUNTRIES MC
-                                                    INNER JOIN COUNTRIES C ON C.CountryCode = MC.CountryCode
-                                                    WHERE MovieID = {movieId}");
-                var platformStrings = RunQuery($"SELECT Platform FROM MOVIE_ON_PLATFORMS WHERE MovieId = {movieId}");
-
-                movies.Add(movieRowString.ToMovie(ratingRowStrings, countryRowStrings, platformStrings));
+                movieTasks.Add(ImportMovieToMongoSchemaAsync(movieId));
             }
 
             LogHelper.Log("Import complete", nameof(SqlService));
 
-            return movies;
+            return (await Task.WhenAll(movieTasks)).ToList();
         }
 
-        private List<User> ImportUsersToMongoScheme()
+        private async Task<Movie> ImportMovieToMongoSchemaAsync(int movieId)
+        {
+            var stringTasks = new List<Task<List<string>>>();
+
+            var movieQuery = $"SELECT Title, Age, MediaType, Runtime, MovieID FROM MOVIES WHERE MovieID = {movieId} ORDER BY MovieID";
+            stringTasks.Add(RunQueryAsync(movieQuery));
+
+            var ratingQuery = $"SELECT RatingSite, Rating FROM MOVIE_RATINGS WHERE MovieID = {movieId}";
+            stringTasks.Add(RunQueryAsync(ratingQuery));
+
+            var countrySql = $@"SELECT C.CountryCode, C.Country, MovieID FROM MOVIE_IN_COUNTRIES MC
+                                INNER JOIN COUNTRIES C ON C.CountryCode = MC.CountryCode
+                                WHERE MovieID = {movieId}";
+            stringTasks.Add(RunQueryAsync(countrySql));
+
+            var platformSql = $"SELECT Platform FROM MOVIE_ON_PLATFORMS WHERE MovieId = {movieId}";
+            stringTasks.Add(RunQueryAsync(platformSql));
+
+            var rowStrings = await Task.WhenAll(stringTasks);
+            return rowStrings[0].First().ToMovie(rowStrings[1], rowStrings[2], rowStrings[3]);
+        }
+
+        private async Task<List<User>> ImportUsersToMongoSchemaAsync()
         {
             LogHelper.Log("Importing USERS", nameof(SqlService));
 
-            var userIDs = RunQuery("SELECT UserID FROM USERS ORDER BY 1").Select(int.Parse).ToList();
+            var userIDs = (await RunQueryAsync("SELECT UserID FROM USERS ORDER BY 1")).Select(int.Parse).ToList();
 
-            var users = new List<User>();
+            var userTasks = new List<Task<User>>();
 
             foreach (var userId in userIDs)
             {
-                var userRowString = RunQuery($"SELECT FullName, Email, BirthDate, CountryCode, Sex, UserID FROM USERS WHERE UserID = {userId}").First();
-                var favoriteMovieRowStrings = RunQuery(@$"  SELECT Title, Age, MediaType, Runtime, M.MovieID
-                                                            FROM MOVIES M
-                                                            INNER JOIN FAVORITE_MOVIES_PER_USER F
-	                                                            ON M.MovieID = F.MovieID
-                                                            WHERE UserId = {userId}
-                                                            ORDER BY M.MovieID");
-                var platformStrings = RunQuery($"SELECT Platform FROM PLATFORM_USERS WHERE UserID = {userId}");
-                var mediaTypeStrings = RunQuery($"SELECT MediaType FROM USER_MEDIA_TYPES WHERE UserID = {userId}");
-
-                users.Add(userRowString.ToUser(favoriteMovieRowStrings, platformStrings, mediaTypeStrings));
+                userTasks.Add(ImportUserToMongoSchemaAsync(userId));
             }
 
             LogHelper.Log("Import complete", nameof(SqlService));
 
-            return users;
+            return (await Task.WhenAll(userTasks)).ToList();
         }
 
-        public List<string> RunQuery(string sqlQuery)
+        private async Task<User> ImportUserToMongoSchemaAsync(int userId)
+        {
+            var stringTasks = new List<Task<List<string>>>();
+
+            var userQuery = $"SELECT FullName, Email, BirthDate, CountryCode, Sex, UserID FROM USERS WHERE UserID = {userId}";
+            stringTasks.Add(RunQueryAsync(userQuery));
+
+            var favoriteMovieQuery = @$"SELECT Title, Age, MediaType, Runtime, M.MovieID
+                                        FROM MOVIES M
+                                        INNER JOIN FAVORITE_MOVIES_PER_USER F
+	                                        ON M.MovieID = F.MovieID
+                                        WHERE UserId = {userId}
+                                        ORDER BY M.MovieID";
+            stringTasks.Add(RunQueryAsync(favoriteMovieQuery));
+
+            var platformQuery = $"SELECT Platform FROM PLATFORM_USERS WHERE UserID = {userId}";
+            stringTasks.Add(RunQueryAsync(platformQuery));
+
+            var mediaTypeQuery = $"SELECT MediaType FROM USER_MEDIA_TYPES WHERE UserID = {userId}";
+            stringTasks.Add(RunQueryAsync(mediaTypeQuery));
+
+            var rowStrings = await Task.WhenAll(stringTasks);
+            return rowStrings[0].First().ToUser(rowStrings[1], rowStrings[2], rowStrings[3]);
+        }
+
+        public async Task<List<string>> RunQueryAsync(string sqlQuery)
         {
             var sqlConnection = new SqlConnection(ConnectionString);
-            sqlConnection.Open();
+            await sqlConnection.OpenAsync();
 
             var command = new SqlCommand(sqlQuery, sqlConnection);
-            var dataReader = command.ExecuteReader();
+            var dataReader = await command.ExecuteReaderAsync();
 
             var rows = new List<string>();
 
-            while (dataReader.Read())
+            while (await dataReader.ReadAsync())
             {
                 var row = string.Empty;
 
