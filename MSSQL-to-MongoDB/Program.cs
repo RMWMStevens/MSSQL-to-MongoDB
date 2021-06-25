@@ -24,11 +24,11 @@ namespace MSSQL_to_MongoDB
             bool showMenu = true;
             while (showMenu)
             {
-                showMenu = await ShowMainMenu();
+                showMenu = await ShowMenu();
             }
         }
 
-        static async Task<bool> ShowMainMenu()
+        static async Task<bool> ShowMenu()
         {
             Console.Clear();
             Console.WriteLine("Select an option:");
