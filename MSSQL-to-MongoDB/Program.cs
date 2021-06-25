@@ -19,16 +19,16 @@ namespace MSSQL_to_MongoDB
 
         static async Task MainAsync()
         {
-            await LoadOnStartup();
+            await LoadOnStartupAsync();
 
             bool showMenu = true;
             while (showMenu)
             {
-                showMenu = await ShowMenu();
+                showMenu = await ShowMenuAsync();
             }
         }
 
-        static async Task<bool> ShowMenu()
+        static async Task<bool> ShowMenuAsync()
         {
             Console.Clear();
             Console.WriteLine("Select an option:");
@@ -48,7 +48,7 @@ namespace MSSQL_to_MongoDB
                     stopwatch.Start();
 
                     LogHelper.Log("Importing SQL database to MongoDB schema...");
-                    var importResult = await sqlService.ImportToMongoSchema();
+                    var importResult = await sqlService.ImportToMongoSchemaAsync();
 
                     if (!importResult.IsSuccess)
                     {
@@ -63,7 +63,7 @@ namespace MSSQL_to_MongoDB
                     LogHelper.Log($"Import | Time: {stopwatch.Elapsed}");
 
                     LogHelper.Log("Converting and exporting to MongoDB...");
-                    var exportResult = await mongoService.Export(mongoDb);
+                    var exportResult = await mongoService.ExportAsync(mongoDb);
 
                     if (!exportResult.IsSuccess)
                     {
@@ -93,12 +93,12 @@ namespace MSSQL_to_MongoDB
             }
         }
 
-        static async Task LoadOnStartup()
+        static async Task LoadOnStartupAsync()
         {
             var tasks = new List<Task>
             {
-                sqlService.LoadOnStartup(),
-                mongoService.LoadOnStartup()
+                sqlService.LoadOnStartupAsync(),
+                mongoService.LoadOnStartupAsync()
             };
 
             await Task.WhenAll(tasks);

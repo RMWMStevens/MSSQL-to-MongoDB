@@ -23,7 +23,7 @@ namespace MSSQL_to_MongoDB.Services
             Console.WriteLine($"Current MSSQL connection string: \n{connectionString}");
         }
 
-        public async Task LoadOnStartup()
+        public async Task LoadOnStartupAsync()
         {
             LogHelper.Log($"Reading {system} configuration file...");
 
