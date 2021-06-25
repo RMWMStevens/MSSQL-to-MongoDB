@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace MSSQL_to_MongoDB.Helpers
 {

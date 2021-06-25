@@ -1,6 +1,7 @@
 ﻿using MSSQL_to_MongoDB.Models;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading.Tasks;
 
 namespace MSSQL_to_MongoDB.Helpers
 {
@@ -11,12 +12,11 @@ namespace MSSQL_to_MongoDB.Helpers
             return File.Exists(filePath);
         }
 
-        public static bool FileEmpty(string filePath)
+        public static async Task<bool> FileEmptyAsync(string filePath)
         {
             try
             {
-                var result = File.ReadAllBytes(filePath).Length <= 0;
-                return File.ReadAllBytes(filePath).Length <= 0;
+                return (await File.ReadAllBytesAsync(filePath)).Length <= 0;
             }
             catch
             {
@@ -40,12 +40,12 @@ namespace MSSQL_to_MongoDB.Helpers
             }
         }
 
-        public static ActionResult<T> LoadFile<T>(string filePath)
+        public static async Task<ActionResult<T>> LoadFileAsync<T>(string filePath)
         {
             try
             {
                 if (!FileExists(filePath)) { return ActionResultHelper.CreateFailureResult<T>("File does not exist!"); }
-                if (FileEmpty(filePath)) { return ActionResultHelper.CreateFailureResult<T>("File is empty!"); }
+                if (await FileEmptyAsync(filePath)) { return ActionResultHelper.CreateFailureResult<T>("File is empty!"); }
 
                 using Stream stream = File.Open(filePath, FileMode.OpenOrCreate);
                 var binaryFormatter = new BinaryFormatter();

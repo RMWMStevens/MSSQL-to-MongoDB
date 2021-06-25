@@ -1,6 +1,7 @@
 ﻿using MSSQL_to_MongoDB.Helpers;
 using MSSQL_to_MongoDB.Models.Enums;
 using System;
+using System.Threading.Tasks;
 
 namespace MSSQL_to_MongoDB.Services
 {
@@ -22,11 +23,11 @@ namespace MSSQL_to_MongoDB.Services
             Console.WriteLine($"Current MSSQL connection string: \n{connectionString}");
         }
 
-        public void LoadOnStartup()
+        public async Task LoadOnStartup()
         {
             LogHelper.Log($"Reading {system} configuration file...");
 
-            var loadResult = FileHelper.LoadFile<string>(GetFilePath(system));
+            var loadResult = await FileHelper.LoadFileAsync<string>(GetFilePath(system));
             if (!loadResult.IsSuccess)
             {
                 Console.WriteLine(loadResult.Message);

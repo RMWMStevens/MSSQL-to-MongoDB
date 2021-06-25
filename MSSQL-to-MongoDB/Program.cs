@@ -1,7 +1,9 @@
 ﻿using MSSQL_to_MongoDB.Helpers;
 using MSSQL_to_MongoDB.Services;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace MSSQL_to_MongoDB
 {
@@ -12,18 +14,21 @@ namespace MSSQL_to_MongoDB
 
         static void Main(string[] args)
         {
-            sqlService.LoadOnStartup();
-            mongoService.LoadOnStartup();
-            PressToContinue();
+            MainAsync().GetAwaiter().GetResult();
+        }
+
+        static async Task MainAsync()
+        {
+            await LoadOnStartup();
 
             bool showMenu = true;
             while (showMenu)
             {
-                showMenu = MainMenu();
+                showMenu = await ShowMainMenu();
             }
         }
 
-        static bool MainMenu()
+        static async Task<bool> ShowMainMenu()
         {
             Console.Clear();
             Console.WriteLine("Select an option:");
@@ -43,7 +48,7 @@ namespace MSSQL_to_MongoDB
                     stopwatch.Start();
 
                     LogHelper.Log("Importing SQL database to MongoDB schema...");
-                    var importResult = sqlService.ImportToMongoScheme();
+                    var importResult = await sqlService.ImportToMongoSchema();
 
                     if (!importResult.IsSuccess)
                     {
@@ -58,7 +63,7 @@ namespace MSSQL_to_MongoDB
                     LogHelper.Log($"Import | Time: {stopwatch.Elapsed}");
 
                     LogHelper.Log("Converting and exporting to MongoDB...");
-                    var exportResult = mongoService.Export(mongoDb);
+                    var exportResult = await mongoService.Export(mongoDb);
 
                     if (!exportResult.IsSuccess)
                     {
@@ -86,6 +91,19 @@ namespace MSSQL_to_MongoDB
                 default:
                     return true;
             }
+        }
+
+        static async Task LoadOnStartup()
+        {
+            var tasks = new List<Task>
+            {
+                sqlService.LoadOnStartup(),
+                mongoService.LoadOnStartup()
+            };
+
+            await Task.WhenAll(tasks);
+
+            PressToContinue();
         }
 
         static void ShowConnectionInfo()
