@@ -28,6 +28,7 @@ namespace MSSQL_to_MongoDB.Helpers
         {
             try
             {
+                new FileInfo(filePath).Directory.Create();
                 using Stream stream = File.Open(filePath, FileMode.Create);
                 var binaryFormatter = new BinaryFormatter();
                 binaryFormatter.Serialize(stream, connectionInfo);
