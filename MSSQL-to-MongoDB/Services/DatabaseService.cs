@@ -27,7 +27,7 @@ namespace MSSQL_to_MongoDB.Services
         {
             LogHelper.Log($"Reading {system} configuration file...");
 
-            var loadResult = await FileHelper.LoadFileAsync<string>(GetFilePath(system));
+            var loadResult = await FileHelper.LoadAsync<string>(GetFilePath(system));
             if (!loadResult.IsSuccess)
             {
                 Console.WriteLine(loadResult.Message);
@@ -51,7 +51,7 @@ namespace MSSQL_to_MongoDB.Services
                 if (string.IsNullOrEmpty(input)) { return; }
 
                 connectionString = input;
-                FileHelper.SaveFile(GetFilePath(System), connectionString);
+                FileHelper.Save(GetFilePath(System), connectionString);
             }
             catch (Exception ex)
             {

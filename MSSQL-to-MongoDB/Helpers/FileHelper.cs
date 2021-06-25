@@ -7,7 +7,7 @@ namespace MSSQL_to_MongoDB.Helpers
 {
     public static class FileHelper
     {
-        public static bool FileExists(string filePath)
+        public static bool Exists(string filePath)
         {
             return File.Exists(filePath);
         }
@@ -24,7 +24,7 @@ namespace MSSQL_to_MongoDB.Helpers
             }
         }
 
-        public static ActionResult SaveFile<T>(string filePath, T connectionInfo)
+        public static ActionResult Save<T>(string filePath, T connectionInfo)
         {
             try
             {
@@ -40,11 +40,11 @@ namespace MSSQL_to_MongoDB.Helpers
             }
         }
 
-        public static async Task<ActionResult<T>> LoadFileAsync<T>(string filePath)
+        public static async Task<ActionResult<T>> LoadAsync<T>(string filePath)
         {
             try
             {
-                if (!FileExists(filePath)) { return ActionResultHelper.CreateFailureResult<T>("File does not exist!"); }
+                if (!Exists(filePath)) { return ActionResultHelper.CreateFailureResult<T>("File does not exist!"); }
                 if (await IsEmptyAsync(filePath)) { return ActionResultHelper.CreateFailureResult<T>("File is empty!"); }
 
                 using Stream stream = File.Open(filePath, FileMode.OpenOrCreate);
