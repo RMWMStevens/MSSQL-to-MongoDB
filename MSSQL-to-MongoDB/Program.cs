@@ -53,7 +53,7 @@ namespace MSSQL_to_MongoDB
                     }
 
                     var mongoDb = importResult.Data;
-                    LogHelper.Log("Succesfully imported");
+                    LogHelper.Log("Successfully imported");
 
                     LogHelper.Log($"Import | Time: {stopwatch.Elapsed}");
 
@@ -67,7 +67,7 @@ namespace MSSQL_to_MongoDB
                         return false;
                     }
 
-                    LogHelper.Log("Succesfully converted and exported");
+                    LogHelper.Log("Successfully converted and exported");
                     LogHelper.Log($"Convert & Export | Total time: {stopwatch.Elapsed}");
                     PressToContinue();
                     return true;

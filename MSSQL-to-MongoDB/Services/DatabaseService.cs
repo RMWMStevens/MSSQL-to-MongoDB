@@ -33,7 +33,7 @@ namespace MSSQL_to_MongoDB.Services
                 return;
             }
 
-            LogHelper.Log($"Loaded {system} connection strings succesfully from local filesystem");
+            LogHelper.Log($"Loaded {system} connection strings successfully from local filesystem");
             connectionString = loadResult.Data;
         }
 
