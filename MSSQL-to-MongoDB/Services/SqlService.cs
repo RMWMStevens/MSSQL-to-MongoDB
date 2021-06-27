@@ -159,7 +159,7 @@ namespace MSSQL_to_MongoDB.Services
                 rows.Add(row);
             }
 
-            sqlConnection.Close();
+            await sqlConnection.CloseAsync();
             return rows;
         }
     }
