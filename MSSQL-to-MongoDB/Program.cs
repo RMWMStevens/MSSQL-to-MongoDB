@@ -1,7 +1,6 @@
 ﻿using MSSQL_to_MongoDB.Helpers;
 using MSSQL_to_MongoDB.Services;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -95,13 +94,10 @@ namespace MSSQL_to_MongoDB
 
         static async Task LoadConfigFromFileSystemAsync()
         {
-            var tasks = new List<Task>
-            {
+            await Task.WhenAll (
                 sqlService.LoadConfigFromFileSystemAsync(),
                 mongoService.LoadConfigFromFileSystemAsync()
-            };
-
-            await Task.WhenAll(tasks);
+            );
 
             PressToContinue();
         }

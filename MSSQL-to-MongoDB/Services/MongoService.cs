@@ -20,7 +20,7 @@ namespace MSSQL_to_MongoDB.Services
             system = Models.Enums.DatabaseSystem.MongoDB;
         }
 
-        public override string GetExampleFormat()
+        public override string GetExampleConnectionStringFormat()
         {
             return @"mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
         }
@@ -31,16 +31,23 @@ namespace MSSQL_to_MongoDB.Services
             {
                 await DropCollectionsAsync();
 
-                await InsertAsync(Collections.COUNTRIES, mongoDb.Countries);
-                await InsertAsync(Collections.MOVIES, mongoDb.Movies);
-                await InsertAsync(Collections.USERS, mongoDb.Users);
+                await Task.WhenAll (
+                    InsertAsync(Collections.COUNTRIES, mongoDb.Countries),
+                    InsertAsync(Collections.MOVIES, mongoDb.Movies),
+                    InsertAsync(Collections.USERS, mongoDb.Users)
+                );
 
-                var movieRefs = await GetMovieReferencesAsync(mongoDb.Movies);
-                await DropCollection(Collections.MOVIES);
+                var movieRefsTask = GetMovieReferencesAsync(mongoDb.Movies);
+                var userRefsTask = GetUserReferencesAsync(mongoDb.Users);
+
+                await Task.WhenAll(movieRefsTask, userRefsTask);
+
+                var movieRefs = await movieRefsTask;
+                var userRefs = await userRefsTask;
+
+                await Task.WhenAll(DropCollection(Collections.MOVIES), DropCollection(Collections.USERS));
+
                 await InsertAsync(Collections.MOVIES, movieRefs);
-
-                var userRefs = await GetUserReferencesAsync(mongoDb.Users);
-                await DropCollection(Collections.USERS);
                 await InsertAsync(Collections.USERS, userRefs);
 
                 return new ActionResult { IsSuccess = true };
@@ -53,7 +60,7 @@ namespace MSSQL_to_MongoDB.Services
 
         private async Task<List<Movie_REF>> GetMovieReferencesAsync(List<Movie> movies)
         {
-            LogHelper.Log("Getting MOVIE references", nameof(MongoService));
+            LogHelper.Log("Getting movie references", nameof(MongoService));
 
             var movieRefTasks = new List<Task<Movie_REF>>();
 
@@ -89,7 +96,7 @@ namespace MSSQL_to_MongoDB.Services
 
         private async Task<List<User_REF>> GetUserReferencesAsync(List<User> users)
         {
-            LogHelper.Log("Getting USER references", nameof(MongoService));
+            LogHelper.Log("Getting user references", nameof(MongoService));
 
             var userRefTasks = new List<Task<User_REF>>();
 
@@ -109,9 +116,14 @@ namespace MSSQL_to_MongoDB.Services
 
             var movieFilterDef = new FilterDefinitionBuilder<Movie>();
             var movieFilter = movieFilterDef.In(x => x.MovieID, user.Favorites.Select(f => f.MovieID));
-            var favorites = await moviesCollection.Find(movieFilter).ToListAsync();
 
-            var country = await countriesCollection.Find(c => c.CountryCode == user.CountryCode).FirstOrDefaultAsync();
+            var favoritesTask = moviesCollection.Find(movieFilter).ToListAsync();
+            var countryTask = countriesCollection.Find(c => c.CountryCode == user.CountryCode).FirstOrDefaultAsync();
+
+            await Task.WhenAll(favoritesTask, countryTask);
+
+            var favorites = await favoritesTask;
+            var country = await countryTask;
 
             return new User_REF
             {

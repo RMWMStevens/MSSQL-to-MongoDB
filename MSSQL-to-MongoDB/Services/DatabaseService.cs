@@ -44,7 +44,7 @@ namespace MSSQL_to_MongoDB.Services
             {
                 Console.WriteLine($"Setting connection string for database system: {system}");
                 Console.WriteLine($"Leave empty and press Enter to skip setting a new string\n");
-                Console.WriteLine($"The connection string should be of the following format: \n{GetExampleFormat()}\n");
+                Console.WriteLine($"The connection string should be of the following format: \n{GetExampleConnectionStringFormat()}\n");
 
                 var input = Console.ReadLine();
 
@@ -59,6 +59,6 @@ namespace MSSQL_to_MongoDB.Services
             }
         }
 
-        public abstract string GetExampleFormat();
+        public abstract string GetExampleConnectionStringFormat();
     }
 }

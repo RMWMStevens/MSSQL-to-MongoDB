@@ -17,7 +17,7 @@ namespace MSSQL_to_MongoDB.Services
             system = Models.Enums.DatabaseSystem.MSSQL;
         }
 
-        public override string GetExampleFormat()
+        public override string GetExampleConnectionStringFormat()
         {
             var sqlAuth = @"Data Source=COMPUTERNAME;Initial Catalog=DATABASENAME;User ID=USERNAME;Password=PASSWORD";
             var winAuth = @"Data Source=COMPUTERNAME;Initial Catalog=DATABASENAME;Integrated Security=SSPI;";
@@ -29,11 +29,17 @@ namespace MSSQL_to_MongoDB.Services
         {
             try
             {
+                var countriesTask = ImportCountriesToMongoSchemaAsync();
+                var moviesTask = ImportMoviesToMongoSchemaAsync();
+                var usersTask = ImportUsersToMongoSchemaAsync();
+
+                await Task.WhenAll(countriesTask, moviesTask, usersTask);
+
                 var mongoDb = new MONGO_DB
                 {
-                    Countries = await ImportCountriesToMongoSchemaAsync(),
-                    Movies = await ImportMoviesToMongoSchemaAsync(),
-                    Users = await ImportUsersToMongoSchemaAsync(),
+                    Countries = await countriesTask,
+                    Movies = await moviesTask,
+                    Users = await usersTask,
                 };
                 return ActionResultHelper.CreateSuccessResult(mongoDb);
             }
@@ -45,18 +51,18 @@ namespace MSSQL_to_MongoDB.Services
 
         private async Task<List<Country>> ImportCountriesToMongoSchemaAsync()
         {
-            LogHelper.Log("Importing COUNTRIES", nameof(SqlService));
+            LogHelper.Log("Importing countries", nameof(SqlService));
 
             var countryRowStrings = await RunQueryAsync("SELECT CountryCode, Country FROM COUNTRIES ORDER BY 1");
 
-            LogHelper.Log("Import complete", nameof(SqlService));
+            LogHelper.Log("Importing countries complete", nameof(SqlService));
 
             return countryRowStrings.ToCountries();
         }
 
         private async Task<List<Movie>> ImportMoviesToMongoSchemaAsync()
         {
-            LogHelper.Log("Importing MOVIES", nameof(SqlService));
+            LogHelper.Log("Importing movies", nameof(SqlService));
 
             var movieIDs = (await RunQueryAsync("SELECT MovieID FROM MOVIES ORDER BY 1")).Select(int.Parse).ToList();
 
@@ -67,7 +73,7 @@ namespace MSSQL_to_MongoDB.Services
                 movieTasks.Add(ImportMovieToMongoSchemaAsync(movieId));
             }
 
-            LogHelper.Log("Import complete", nameof(SqlService));
+            LogHelper.Log("Importing movies complete", nameof(SqlService));
 
             return (await Task.WhenAll(movieTasks)).ToList();
         }
@@ -96,7 +102,7 @@ namespace MSSQL_to_MongoDB.Services
 
         private async Task<List<User>> ImportUsersToMongoSchemaAsync()
         {
-            LogHelper.Log("Importing USERS", nameof(SqlService));
+            LogHelper.Log("Importing users", nameof(SqlService));
 
             var userIDs = (await RunQueryAsync("SELECT UserID FROM USERS ORDER BY 1")).Select(int.Parse).ToList();
 
@@ -107,7 +113,7 @@ namespace MSSQL_to_MongoDB.Services
                 userTasks.Add(ImportUserToMongoSchemaAsync(userId));
             }
 
-            LogHelper.Log("Import complete", nameof(SqlService));
+            LogHelper.Log("Importing users complete", nameof(SqlService));
 
             return (await Task.WhenAll(userTasks)).ToList();
         }
