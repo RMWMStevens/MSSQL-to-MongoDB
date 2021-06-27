@@ -12,14 +12,14 @@ namespace MSSQL_to_MongoDB
         private static readonly SqlService sqlService = new SqlService();
         private static readonly MongoService mongoService = new MongoService();
 
-        static void Main(string[] args)
+        static void Main()
         {
             MainAsync().GetAwaiter().GetResult();
         }
 
         static async Task MainAsync()
         {
-            await LoadOnStartupAsync();
+            await LoadConfigFromFileSystemAsync();
 
             bool showMenu = true;
             while (showMenu)
@@ -93,12 +93,12 @@ namespace MSSQL_to_MongoDB
             }
         }
 
-        static async Task LoadOnStartupAsync()
+        static async Task LoadConfigFromFileSystemAsync()
         {
             var tasks = new List<Task>
             {
-                sqlService.LoadOnStartupAsync(),
-                mongoService.LoadOnStartupAsync()
+                sqlService.LoadConfigFromFileSystemAsync(),
+                mongoService.LoadConfigFromFileSystemAsync()
             };
 
             await Task.WhenAll(tasks);
