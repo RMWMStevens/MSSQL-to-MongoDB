@@ -28,7 +28,7 @@ IDE for building C# projects and running this particular one.
 
 After installing all required programs, start MSSQL-to-MongoDB and use the 2 and 3 keys in the Console TUI to configure your MongoDB and SQL connection strings (examples given in menu). This information will be saved locally so this step won't have to be repeated each time when running the program. Use the '4'-key in the Console TUI to check if the entered information has been saved correctly.
 
-## Execution
+## Usage
 
 When properly set up and after pressing '1' in the Console TUI, the program will try to load the most important parts of the MS SQL database into a MongoDB one. Depending on your device, this will take about 5 to 10 minutes, after which all data should be loaded into MongoDB correctly.
 
