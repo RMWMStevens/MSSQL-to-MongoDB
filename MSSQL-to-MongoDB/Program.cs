@@ -94,7 +94,7 @@ namespace MSSQL_to_MongoDB
 
         static async Task LoadConfigFromFileSystemAsync()
         {
-            await Task.WhenAll (
+            await Task.WhenAll(
                 sqlService.LoadConfigFromFileSystemAsync(),
                 mongoService.LoadConfigFromFileSystemAsync()
             );

@@ -25,19 +25,17 @@ namespace MSSQL_to_MongoDB.Services
             return $"For SQL Authentication: \n{sqlAuth}\nFor Windows Authentication (leave 'SSPI' as is): \n{winAuth}";
         }
 
-        public async Task<ActionResult<MONGO_DB>> ImportToMongoSchemaAsync()
+        public async Task<ActionResult<MongoDb>> ImportToMongoSchemaAsync()
         {
             try
             {
-                var countriesTask = ImportCountriesToMongoSchemaAsync();
                 var moviesTask = ImportMoviesToMongoSchemaAsync();
                 var usersTask = ImportUsersToMongoSchemaAsync();
 
-                await Task.WhenAll(countriesTask, moviesTask, usersTask);
+                await Task.WhenAll(moviesTask, usersTask);
 
-                var mongoDb = new MONGO_DB
+                var mongoDb = new MongoDb
                 {
-                    Countries = await countriesTask,
                     Movies = await moviesTask,
                     Users = await usersTask,
                 };
@@ -45,26 +43,15 @@ namespace MSSQL_to_MongoDB.Services
             }
             catch (Exception ex)
             {
-                return ActionResultHelper.CreateErrorResult<MONGO_DB>(ex);
+                return ActionResultHelper.CreateErrorResult<MongoDb>(ex);
             }
         }
 
-        private async Task<List<Country>> ImportCountriesToMongoSchemaAsync()
-        {
-            LogHelper.Log("Importing countries", nameof(SqlService));
-
-            var countryRowStrings = await RunQueryAsync("SELECT CountryCode, Country FROM COUNTRIES ORDER BY 1");
-
-            LogHelper.Log("Importing countries complete", nameof(SqlService));
-
-            return countryRowStrings.ToCountries();
-        }
-
-        private async Task<List<Movie>> ImportMoviesToMongoSchemaAsync()
+        private async Task<IEnumerable<Movie>> ImportMoviesToMongoSchemaAsync()
         {
             LogHelper.Log("Importing movies", nameof(SqlService));
 
-            var movieIDs = (await RunQueryAsync("SELECT MovieID FROM MOVIES ORDER BY 1")).Select(int.Parse).ToList();
+            var movieIDs = (await RunQueryAsync("SELECT MovieID FROM MOVIES ORDER BY 1")).Select(int.Parse);
 
             var movieTasks = new List<Task<Movie>>();
 
@@ -75,36 +62,36 @@ namespace MSSQL_to_MongoDB.Services
 
             LogHelper.Log("Importing movies complete", nameof(SqlService));
 
-            return (await Task.WhenAll(movieTasks)).ToList();
+            return await Task.WhenAll(movieTasks);
         }
 
         private async Task<Movie> ImportMovieToMongoSchemaAsync(int movieId)
         {
-            var stringTasks = new List<Task<List<string>>>();
+            var rowStringTasks = new List<Task<IEnumerable<string>>>();
 
             var movieQuery = $"SELECT Title, Age, MediaType, Runtime, MovieID FROM MOVIES WHERE MovieID = {movieId} ORDER BY MovieID";
-            stringTasks.Add(RunQueryAsync(movieQuery));
+            rowStringTasks.Add(RunQueryAsync(movieQuery));
 
             var ratingQuery = $"SELECT RatingSite, Rating FROM MOVIE_RATINGS WHERE MovieID = {movieId}";
-            stringTasks.Add(RunQueryAsync(ratingQuery));
+            rowStringTasks.Add(RunQueryAsync(ratingQuery));
 
-            var countrySql = $@"SELECT C.CountryCode, C.Country, MovieID FROM MOVIE_IN_COUNTRIES MC
+            var countryQuery = $@"SELECT C.CountryCode, C.Country FROM MOVIE_IN_COUNTRIES MC
                                 INNER JOIN COUNTRIES C ON C.CountryCode = MC.CountryCode
                                 WHERE MovieID = {movieId}";
-            stringTasks.Add(RunQueryAsync(countrySql));
+            rowStringTasks.Add(RunQueryAsync(countryQuery));
 
-            var platformSql = $"SELECT Platform FROM MOVIE_ON_PLATFORMS WHERE MovieId = {movieId}";
-            stringTasks.Add(RunQueryAsync(platformSql));
+            var platformQuery = $"SELECT Platform FROM MOVIE_ON_PLATFORMS WHERE MovieId = {movieId}";
+            rowStringTasks.Add(RunQueryAsync(platformQuery));
 
-            var rowStrings = await Task.WhenAll(stringTasks);
+            var rowStrings = await Task.WhenAll(rowStringTasks);
             return rowStrings[0].First().ToMovie(rowStrings[1], rowStrings[2], rowStrings[3]);
         }
 
-        private async Task<List<User>> ImportUsersToMongoSchemaAsync()
+        private async Task<IEnumerable<User>> ImportUsersToMongoSchemaAsync()
         {
             LogHelper.Log("Importing users", nameof(SqlService));
 
-            var userIDs = (await RunQueryAsync("SELECT UserID FROM USERS ORDER BY 1")).Select(int.Parse).ToList();
+            var userIDs = (await RunQueryAsync("SELECT UserID FROM USERS ORDER BY 1")).Select(int.Parse);
 
             var userTasks = new List<Task<User>>();
 
@@ -115,15 +102,15 @@ namespace MSSQL_to_MongoDB.Services
 
             LogHelper.Log("Importing users complete", nameof(SqlService));
 
-            return (await Task.WhenAll(userTasks)).ToList();
+            return await Task.WhenAll(userTasks);
         }
 
         private async Task<User> ImportUserToMongoSchemaAsync(int userId)
         {
-            var stringTasks = new List<Task<List<string>>>();
+            var rowStringTasks = new List<Task<IEnumerable<string>>>();
 
-            var userQuery = $"SELECT FullName, Email, BirthDate, CountryCode, Sex, UserID FROM USERS WHERE UserID = {userId}";
-            stringTasks.Add(RunQueryAsync(userQuery));
+            var userQuery = @$"SELECT FullName, Email, BirthDate, Sex, UserID FROM USERS U WHERE UserID = {userId}";
+            rowStringTasks.Add(RunQueryAsync(userQuery));
 
             var favoriteMovieQuery = @$"SELECT Title, Age, MediaType, Runtime, M.MovieID
                                         FROM MOVIES M
@@ -131,21 +118,28 @@ namespace MSSQL_to_MongoDB.Services
 	                                        ON M.MovieID = F.MovieID
                                         WHERE UserId = {userId}
                                         ORDER BY M.MovieID";
-            stringTasks.Add(RunQueryAsync(favoriteMovieQuery));
+            rowStringTasks.Add(RunQueryAsync(favoriteMovieQuery));
 
             var platformQuery = $"SELECT Platform FROM PLATFORM_USERS WHERE UserID = {userId}";
-            stringTasks.Add(RunQueryAsync(platformQuery));
+            rowStringTasks.Add(RunQueryAsync(platformQuery));
 
             var mediaTypeQuery = $"SELECT MediaType FROM USER_MEDIA_TYPES WHERE UserID = {userId}";
-            stringTasks.Add(RunQueryAsync(mediaTypeQuery));
+            rowStringTasks.Add(RunQueryAsync(mediaTypeQuery));
 
-            var rowStrings = await Task.WhenAll(stringTasks);
-            return rowStrings[0].First().ToUser(rowStrings[1], rowStrings[2], rowStrings[3]);
+            var countryQuery = $@"SELECT C.CountryCode, Country
+                                FROM COUNTRIES C
+                                INNER JOIN USERS U
+	                                ON C.CountryCode = U.CountryCode
+                                WHERE UserID = {userId}";
+            rowStringTasks.Add(RunQueryAsync(countryQuery));
+
+            var rowStrings = await Task.WhenAll(rowStringTasks);
+            return rowStrings[0].First().ToUser(rowStrings[1], rowStrings[2], rowStrings[3], rowStrings[4]);
         }
 
-        public async Task<List<string>> RunQueryAsync(string sqlQuery)
+        public async Task<IEnumerable<string>> RunQueryAsync(string sqlQuery)
         {
-            var sqlConnection = new SqlConnection(ConnectionString);
+            var sqlConnection = new SqlConnection(connectionString);
             await sqlConnection.OpenAsync();
 
             var command = new SqlCommand(sqlQuery, sqlConnection);

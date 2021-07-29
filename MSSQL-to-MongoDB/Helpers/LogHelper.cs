@@ -2,7 +2,7 @@
 
 namespace MSSQL_to_MongoDB.Helpers
 {
-    public class LogHelper
+    public static class LogHelper
     {
         public static void Log(string message, string location = "")
         {

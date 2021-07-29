@@ -7,7 +7,7 @@ namespace MSSQL_to_MongoDB.Extensions
 {
     public static class MongoExtensions
     {
-        public static List<Movie> ToMoviesWithoutRatingsCountriesPlatforms(this List<string> movieRowStrings)
+        public static IEnumerable<Movie> ToMoviesWithoutRatingsCountriesPlatforms(this IEnumerable<string> movieRowStrings)
         {
             var movies = new List<Movie>();
 
@@ -21,7 +21,7 @@ namespace MSSQL_to_MongoDB.Extensions
             return movies;
         }
 
-        public static Movie ToMovie(this string movieRowString, List<string> ratingRowStrings, List<string> countryRowStrings, List<string> platformStrings)
+        public static Movie ToMovie(this string movieRowString, IEnumerable<string> ratingRowStrings, IEnumerable<string> countryRowStrings, IEnumerable<string> platformStrings)
         {
             var movieRowCols = movieRowString.Split('|');
 
@@ -38,7 +38,7 @@ namespace MSSQL_to_MongoDB.Extensions
             };
         }
 
-        public static List<MovieRating> ToRatings(this List<string> ratingRowStrings)
+        public static IEnumerable<MovieRating> ToRatings(this IEnumerable<string> ratingRowStrings)
         {
             var ratings = new List<MovieRating>();
 
@@ -61,7 +61,7 @@ namespace MSSQL_to_MongoDB.Extensions
             };
         }
 
-        public static List<Country> ToCountries(this List<string> countryRowStrings)
+        public static IEnumerable<Country> ToCountries(this IEnumerable<string> countryRowStrings)
         {
             var countries = new List<Country>();
 
@@ -79,12 +79,17 @@ namespace MSSQL_to_MongoDB.Extensions
 
             return new Country
             {
-                CountryCode = countryRowCols[0],
-                CountryName = countryRowCols[1]
+                Code = countryRowCols[0],
+                Name = countryRowCols[1]
             };
         }
 
-        public static User ToUser(this string userRowString, List<string> favoriteMovieRowStrings, List<string> platformStrings, List<string> mediaTypeStrings)
+        public static User ToUser(
+            this string userRowString,
+            IEnumerable<string> favoriteMovieRowStrings,
+            IEnumerable<string> platformStrings,
+            IEnumerable<string> mediaTypeStrings,
+            IEnumerable<string> countryStrings)
         {
             var userRowCols = userRowString.Split('|');
 
@@ -93,17 +98,17 @@ namespace MSSQL_to_MongoDB.Extensions
                 FullName = userRowCols[0],
                 Email = userRowCols[1],
                 BirthDate = DateTime.Parse(userRowCols[2]),
-                CountryCode = userRowCols[3],
-                Sex = userRowCols[4],
+                Country = countryStrings.First().ToCountry(),
+                Sex = userRowCols[3],
                 MediaTypes = mediaTypeStrings.ToMediaTypes(),
                 Platforms = platformStrings,
                 Favorites = favoriteMovieRowStrings.ToMoviesWithoutRatingsCountriesPlatforms()
             };
         }
 
-        public static List<string> ToMediaTypes(this List<string> mediaTypeStrings)
+        public static IEnumerable<string> ToMediaTypes(this IEnumerable<string> mediaTypeStrings)
         {
-            return mediaTypeStrings.SelectMany(t => t.Split('|')).ToList();
+            return mediaTypeStrings.SelectMany(t => t.Split('|'));
         }
     }
 }

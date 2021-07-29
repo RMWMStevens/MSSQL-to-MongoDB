@@ -13,10 +13,8 @@ namespace MSSQL_to_MongoDB.Models.MongoDB
         public string Age { get; set; }
         public string MediaType { get; set; }
         public int Runtime { get; set; }
-        [BsonIgnore]
-        public List<Country> ReleasedInCountries { get; set; }
-        [BsonIgnore]
-        public List<MovieRating> Ratings { get; set; }
-        public List<string> Platforms { get; set; }
+        public IEnumerable<Country> ReleasedInCountries { get; set; }
+        public IEnumerable<MovieRating> Ratings { get; set; }
+        public IEnumerable<string> Platforms { get; set; }
     }
 }

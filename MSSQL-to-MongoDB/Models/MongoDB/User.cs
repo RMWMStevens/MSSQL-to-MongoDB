@@ -13,12 +13,11 @@ namespace MSSQL_to_MongoDB.Models.MongoDB
         public string FullName { get; set; }
         public string Email { get; set; }
         public DateTime BirthDate { get; set; }
-        [BsonIgnore]
-        public string CountryCode { get; set; }
+        public Country Country { get; set; }
         public string Sex { get; set; }
-        public List<string> Platforms { get; set; }
-        public List<string> MediaTypes { get; set; }
+        public IEnumerable<string> Platforms { get; set; }
+        public IEnumerable<string> MediaTypes { get; set; }
         [BsonIgnore]
-        public List<Movie> Favorites { get; set; }
+        public IEnumerable<Movie> Favorites { get; set; }
     }
 }

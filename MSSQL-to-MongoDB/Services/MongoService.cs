@@ -25,30 +25,20 @@ namespace MSSQL_to_MongoDB.Services
             return @"mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
         }
 
-        public async Task<ActionResult> ExportAsync(MONGO_DB mongoDb)
+        public async Task<ActionResult> ExportAsync(MongoDb mongoDb)
         {
             try
             {
                 await DropCollectionsAsync();
 
-                await Task.WhenAll (
-                    InsertAsync(Collections.COUNTRIES, mongoDb.Countries),
-                    InsertAsync(Collections.MOVIES, mongoDb.Movies),
-                    InsertAsync(Collections.USERS, mongoDb.Users)
+                await Task.WhenAll(
+                    InsertAsync(MongoCollection.Movies, mongoDb.Movies),
+                    InsertAsync(MongoCollection.Users, mongoDb.Users)
                 );
 
-                var movieRefsTask = GetMovieReferencesAsync(mongoDb.Movies);
-                var userRefsTask = GetUserReferencesAsync(mongoDb.Users);
-
-                await Task.WhenAll(movieRefsTask, userRefsTask);
-
-                var movieRefs = await movieRefsTask;
-                var userRefs = await userRefsTask;
-
-                await Task.WhenAll(DropCollection(Collections.MOVIES), DropCollection(Collections.USERS));
-
-                await InsertAsync(Collections.MOVIES, movieRefs);
-                await InsertAsync(Collections.USERS, userRefs);
+                var userRefs = await GetUserReferencesAsync(mongoDb.Users);
+                await DropCollection(MongoCollection.Users);
+                await InsertAsync(MongoCollection.Users, userRefs);
 
                 return new ActionResult { IsSuccess = true };
             }
@@ -58,74 +48,31 @@ namespace MSSQL_to_MongoDB.Services
             }
         }
 
-        private async Task<List<Movie_REF>> GetMovieReferencesAsync(List<Movie> movies)
-        {
-            LogHelper.Log("Getting movie references", nameof(MongoService));
-
-            var movieRefTasks = new List<Task<Movie_REF>>();
-
-            foreach (var movie in movies)
-            {
-                movieRefTasks.Add(GetMovieReferencesAsync(movie));
-            }
-
-            return (await Task.WhenAll(movieRefTasks)).ToList();
-        }
-
-        private async Task<Movie_REF> GetMovieReferencesAsync(Movie movie)
-        {
-            var database = GetDatabase();
-            var countriesCollection = database.GetCollection<Country>(Collections.COUNTRIES.ToString());
-
-            var movieFilterDef = new FilterDefinitionBuilder<Country>();
-            var movieFilter = movieFilterDef.In(x => x.CountryCode, movie.ReleasedInCountries.Select(f => f.CountryCode));
-            var releasedInCountries = await countriesCollection.Find(movieFilter).ToListAsync();
-
-            return new Movie_REF
-            {
-                Id = movie.Id,
-                Title = movie.Title,
-                Age = movie.Age,
-                MediaType = movie.MediaType,
-                Runtime = movie.Runtime,
-                Ratings = movie.Ratings,
-                Platforms = movie.Platforms,
-                ReleasedInCountries = releasedInCountries.Select(x => x.Id).ToList()
-            };
-        }
-
-        private async Task<List<User_REF>> GetUserReferencesAsync(List<User> users)
+        private async Task<IEnumerable<UserRef>> GetUserReferencesAsync(IEnumerable<User> users)
         {
             LogHelper.Log("Getting user references", nameof(MongoService));
 
-            var userRefTasks = new List<Task<User_REF>>();
+            var userRefTasks = new List<Task<UserRef>>();
 
             foreach (var user in users)
             {
                 userRefTasks.Add(GetUserReferencesAsync(user));
             }
 
-            return (await Task.WhenAll(userRefTasks)).ToList();
+            return await Task.WhenAll(userRefTasks);
         }
 
-        private async Task<User_REF> GetUserReferencesAsync(User user)
+        private async Task<UserRef> GetUserReferencesAsync(User user)
         {
             var database = GetDatabase();
-            var countriesCollection = database.GetCollection<Country>(Collections.COUNTRIES.ToString());
-            var moviesCollection = database.GetCollection<Movie>(Collections.MOVIES.ToString());
+            var moviesCollection = database.GetCollection<Movie>(MongoCollection.Movies.ToString());
 
             var movieFilterDef = new FilterDefinitionBuilder<Movie>();
             var movieFilter = movieFilterDef.In(x => x.MovieID, user.Favorites.Select(f => f.MovieID));
 
-            var favoritesTask = moviesCollection.Find(movieFilter).ToListAsync();
-            var countryTask = countriesCollection.Find(c => c.CountryCode == user.CountryCode).FirstOrDefaultAsync();
+            var favorites = await moviesCollection.Find(movieFilter).ToListAsync();
 
-            await Task.WhenAll(favoritesTask, countryTask);
-
-            var favorites = await favoritesTask;
-            var country = await countryTask;
-
-            return new User_REF
+            return new UserRef
             {
                 Id = user.Id,
                 FullName = user.FullName,
@@ -133,13 +80,13 @@ namespace MSSQL_to_MongoDB.Services
                 BirthDate = user.BirthDate,
                 MediaTypes = user.MediaTypes,
                 Sex = user.Sex,
-                Country = country.Id,
+                Country = user.Country,
                 Platforms = user.Platforms,
-                Favorites = favorites.Select(x => x.Id).ToList(),
+                Favorites = favorites.Select(x => x.Id),
             };
         }
 
-        private async Task InsertAsync<T>(Collections collectionName, List<T> list)
+        private async Task InsertAsync<T>(MongoCollection collectionName, IEnumerable<T> list)
         {
             LogHelper.Log($"Exporting {collectionName}", nameof(MongoService));
             var database = GetDatabase();
@@ -150,7 +97,7 @@ namespace MSSQL_to_MongoDB.Services
         private async Task DropCollectionsAsync()
         {
             LogHelper.Log("Dropping collections", nameof(MongoService));
-            var collections = (Collections[])Enum.GetValues(typeof(Collections));
+            var collections = (MongoCollection[])Enum.GetValues(typeof(MongoCollection));
 
             var dropTasks = new List<Task>();
             foreach (var collection in collections)
@@ -160,7 +107,7 @@ namespace MSSQL_to_MongoDB.Services
             await Task.WhenAll(dropTasks);
         }
 
-        private async Task DropCollection(Collections collectionName)
+        private async Task DropCollection(MongoCollection collectionName)
         {
             var database = GetDatabase();
             await database.DropCollectionAsync(collectionName.ToString());
