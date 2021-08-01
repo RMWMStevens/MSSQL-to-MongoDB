@@ -8,7 +8,7 @@ namespace MSSQL_to_MongoDB
 {
     class Program
     {
-        private static readonly SqlService sqlService = new SqlService();
+        private static readonly MsSqlService msSqlService = new MsSqlService();
         private static readonly MongoService mongoService = new MongoService();
 
         static void Main()
@@ -47,7 +47,7 @@ namespace MSSQL_to_MongoDB
                     stopwatch.Start();
 
                     LogHelper.Log("Importing SQL database to MongoDB schema...");
-                    var importResult = await sqlService.ImportToMongoSchemaAsync();
+                    var importResult = await msSqlService.ImportToMongoSchemaAsync();
 
                     if (!importResult.IsSuccess)
                     {
@@ -76,7 +76,7 @@ namespace MSSQL_to_MongoDB
                     PressToContinue();
                     return true;
                 case ConsoleKey.D2:
-                    sqlService.SetConnectionString();
+                    msSqlService.SetConnectionString();
                     return true;
                 case ConsoleKey.D3:
                     mongoService.SetConnectionString();
@@ -95,7 +95,7 @@ namespace MSSQL_to_MongoDB
         static async Task LoadConfigFromFileSystemAsync()
         {
             await Task.WhenAll(
-                sqlService.LoadConfigFromFileSystemAsync(),
+                msSqlService.LoadConfigFromFileSystemAsync(),
                 mongoService.LoadConfigFromFileSystemAsync()
             );
 
@@ -104,7 +104,7 @@ namespace MSSQL_to_MongoDB
 
         static void ShowConnectionInfo()
         {
-            sqlService.ShowConnectionInfo();
+            msSqlService.ShowConnectionInfo();
             Console.WriteLine();
             mongoService.ShowConnectionInfo();
         }

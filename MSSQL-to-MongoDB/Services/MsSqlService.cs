@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace MSSQL_to_MongoDB.Services
 {
-    public class SqlService : DatabaseService
+    public class MsSqlService : DatabaseService
     {
-        public SqlService()
+        public MsSqlService()
         {
             system = Models.Enums.DatabaseSystem.MSSQL;
         }
@@ -49,7 +49,7 @@ namespace MSSQL_to_MongoDB.Services
 
         private async Task<IEnumerable<Movie>> ImportMoviesToMongoSchemaAsync()
         {
-            LogHelper.Log("Importing movies", nameof(SqlService));
+            LogHelper.Log("Importing movies", nameof(MsSqlService));
 
             var movieIDs = (await RunQueryAsync("SELECT MovieID FROM MOVIES ORDER BY 1")).Select(int.Parse);
 
@@ -60,7 +60,7 @@ namespace MSSQL_to_MongoDB.Services
                 movieTasks.Add(ImportMovieToMongoSchemaAsync(movieId));
             }
 
-            LogHelper.Log("Importing movies complete", nameof(SqlService));
+            LogHelper.Log("Importing movies complete", nameof(MsSqlService));
 
             return await Task.WhenAll(movieTasks);
         }
@@ -89,7 +89,7 @@ namespace MSSQL_to_MongoDB.Services
 
         private async Task<IEnumerable<User>> ImportUsersToMongoSchemaAsync()
         {
-            LogHelper.Log("Importing users", nameof(SqlService));
+            LogHelper.Log("Importing users", nameof(MsSqlService));
 
             var userIDs = (await RunQueryAsync("SELECT UserID FROM USERS ORDER BY 1")).Select(int.Parse);
 
@@ -100,7 +100,7 @@ namespace MSSQL_to_MongoDB.Services
                 userTasks.Add(ImportUserToMongoSchemaAsync(userId));
             }
 
-            LogHelper.Log("Importing users complete", nameof(SqlService));
+            LogHelper.Log("Importing users complete", nameof(MsSqlService));
 
             return await Task.WhenAll(userTasks);
         }
