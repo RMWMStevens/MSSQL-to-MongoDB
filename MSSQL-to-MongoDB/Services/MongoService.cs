@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace MSSQL_to_MongoDB.Services
 {
-    public class MongoService : DatabaseService
+    public class MongoService : BaseDbService
     {
         private const string databaseName = "What2Watch";
 

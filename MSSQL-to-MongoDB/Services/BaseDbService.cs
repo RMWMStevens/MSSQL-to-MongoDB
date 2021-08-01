@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace MSSQL_to_MongoDB.Services
 {
-    public abstract class DatabaseService
+    public abstract class BaseDbService
     {
         protected string connectionString;
         public string ConnectionString { get { return connectionString; } }

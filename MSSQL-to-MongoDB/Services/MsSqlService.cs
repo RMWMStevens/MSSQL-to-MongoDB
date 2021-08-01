@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace MSSQL_to_MongoDB.Services
 {
-    public class MsSqlService : DatabaseService
+    public class MsSqlService : BaseDbService
     {
         public MsSqlService()
         {
