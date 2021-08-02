@@ -1,6 +1,7 @@
 ﻿using MongoDB.Driver;
 using MSSQL_to_MongoDB.Helpers;
 using MSSQL_to_MongoDB.Models;
+using MSSQL_to_MongoDB.Models.Enums;
 using MSSQL_to_MongoDB.Models.MongoDB;
 using MSSQL_to_MongoDB.Models.MongoDB.Enums;
 using MSSQL_to_MongoDB.Models.MongoDB.References;
@@ -17,7 +18,7 @@ namespace MSSQL_to_MongoDB.Services
 
         public MongoService()
         {
-            system = Models.Enums.DatabaseSystem.MongoDB;
+            system = DatabaseSystem.MongoDB;
         }
 
         public override string GetExampleConnectionStringFormat()
