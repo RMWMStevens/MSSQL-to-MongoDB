@@ -20,7 +20,7 @@ namespace MSSQL_to_MongoDB.Services
 
         public void ShowConnectionInfo()
         {
-            Console.WriteLine($"Current MSSQL connection string: \n{connectionString}");
+            Console.WriteLine($"Current {system} connection string: \n{connectionString}");
         }
 
         public async Task LoadConfigFromFileSystemAsync()
