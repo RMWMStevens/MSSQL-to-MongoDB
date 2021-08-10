@@ -80,10 +80,10 @@ namespace MSSQL_to_MongoDB
                     PressToContinue();
                     return true;
                 case ConsoleKey.D1:
-                    msSqlService.SetConnectionString();
+                    await msSqlService.SetConnectionString();
                     return true;
                 case ConsoleKey.D2:
-                    mongoService.SetConnectionString();
+                    await mongoService.SetConnectionString();
                     return true;
                 case ConsoleKey.Escape:
                     return false;

@@ -37,7 +37,7 @@ namespace MSSQL_to_MongoDB.Services
             connectionString = loadResult.Data;
         }
 
-        public async void SetConnectionString()
+        public async Task SetConnectionString()
         {
             try
             {
