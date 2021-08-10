@@ -31,10 +31,10 @@ namespace MSSQL_to_MongoDB
         {
             Console.Clear();
             Console.WriteLine("Select an option:");
-            Console.WriteLine("1) Start conversion from MSSQL to MongoDB");
-            Console.WriteLine("2) Change MSSQL connection string");
-            Console.WriteLine("3) Change MongoDB connection string");
-            Console.WriteLine("4) Show current connection info");
+            Console.WriteLine("i) Show current connection info");
+            Console.WriteLine("Enter) Start conversion from MSSQL to MongoDB");
+            Console.WriteLine("1) Change MSSQL connection string");
+            Console.WriteLine("2) Change MongoDB connection string");
             Console.WriteLine("ESC) Exit");
 
             var key = Console.ReadKey().Key;
@@ -42,7 +42,11 @@ namespace MSSQL_to_MongoDB
 
             switch (key)
             {
-                case ConsoleKey.D1:
+                case ConsoleKey.I:
+                    ShowConnectionInfo();
+                    PressToContinue();
+                    return true;
+                case ConsoleKey.Enter:
                     var stopwatch = new Stopwatch();
                     stopwatch.Start();
 
@@ -51,7 +55,7 @@ namespace MSSQL_to_MongoDB
 
                     if (!importResult.IsSuccess)
                     {
-                        LogHelper.Log($"Importing failed: {importResult.Message}");
+                        LogHelper.LogError($"Importing failed: {importResult.Message}");
                         PressToContinue();
                         return false;
                     }
@@ -66,7 +70,7 @@ namespace MSSQL_to_MongoDB
 
                     if (!exportResult.IsSuccess)
                     {
-                        LogHelper.Log($"Converting and exporting failed: {exportResult.Message}");
+                        LogHelper.LogError($"Converting and exporting failed: {exportResult.Message}");
                         PressToContinue();
                         return false;
                     }
@@ -75,15 +79,11 @@ namespace MSSQL_to_MongoDB
                     LogHelper.Log($"Convert & Export | Total time: {stopwatch.Elapsed}");
                     PressToContinue();
                     return true;
-                case ConsoleKey.D2:
+                case ConsoleKey.D1:
                     msSqlService.SetConnectionString();
                     return true;
-                case ConsoleKey.D3:
+                case ConsoleKey.D2:
                     mongoService.SetConnectionString();
-                    return true;
-                case ConsoleKey.D4:
-                    ShowConnectionInfo();
-                    PressToContinue();
                     return true;
                 case ConsoleKey.Escape:
                     return false;

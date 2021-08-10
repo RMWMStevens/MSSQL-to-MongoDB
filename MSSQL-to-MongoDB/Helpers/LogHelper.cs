@@ -13,6 +13,13 @@ namespace MSSQL_to_MongoDB.Helpers
             Console.WriteLine(log);
         }
 
+        public static void LogError(string message, string location = "")
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Log(message, location);
+            Console.ResetColor();
+        }
+
         private static string GetTimestamp()
         {
             return DateTime.Now.ToString("HH:mm:ss.fff");

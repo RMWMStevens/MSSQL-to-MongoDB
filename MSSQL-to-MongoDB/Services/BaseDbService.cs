@@ -15,7 +15,7 @@ namespace MSSQL_to_MongoDB.Services
 
         public string GetFilePath(DatabaseSystem system)
         {
-            return $"./MSSQL-to-MongoDB - Settings/mssql-to-mongodb_{system}.bin";
+            return $"./MSSQL-to-MongoDB - Settings/mssql-to-mongodb_{system}.txt";
         }
 
         public void ShowConnectionInfo()
@@ -30,7 +30,7 @@ namespace MSSQL_to_MongoDB.Services
             var loadResult = await FileHelper.LoadAsync<string>(GetFilePath(system));
             if (!loadResult.IsSuccess)
             {
-                Console.WriteLine(loadResult.Message);
+                LogHelper.LogError(loadResult.Message);
                 return;
             }
 
@@ -51,7 +51,7 @@ namespace MSSQL_to_MongoDB.Services
                 if (string.IsNullOrEmpty(input)) { return; }
 
                 connectionString = input;
-                FileHelper.Save(GetFilePath(System), connectionString);
+                FileHelper.SaveAsync(GetFilePath(System), connectionString);
             }
             catch (Exception ex)
             {
