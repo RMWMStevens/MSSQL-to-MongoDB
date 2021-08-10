@@ -7,10 +7,7 @@ namespace MSSQL_to_MongoDB.Helpers
 {
     public static class FileHelper
     {
-        public static bool Exists(string filePath)
-        {
-            return File.Exists(filePath);
-        }
+        public static bool Exists(string filePath) => File.Exists(filePath);
 
         public async static Task<ActionResult> SaveAsync(string filePath, string connectionInfo)
         {
