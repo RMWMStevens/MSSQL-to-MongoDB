@@ -13,10 +13,7 @@ namespace MSSQL_to_MongoDB.Services
 {
     public class MsSqlService : BaseDbService
     {
-        public MsSqlService()
-        {
-            system = DatabaseSystem.MSSQL;
-        }
+        public override DatabaseSystem System => DatabaseSystem.MSSQL;
 
         public override string GetExampleConnectionStringFormat()
         {

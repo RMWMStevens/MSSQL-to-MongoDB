@@ -16,10 +16,7 @@ namespace MSSQL_to_MongoDB.Services
     {
         private const string databaseName = "What2Watch";
 
-        public MongoService()
-        {
-            system = DatabaseSystem.MongoDB;
-        }
+        public override DatabaseSystem System => DatabaseSystem.MongoDB;
 
         public override string GetExampleConnectionStringFormat()
         {
